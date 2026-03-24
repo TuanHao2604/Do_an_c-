@@ -1,0 +1,82 @@
+@page "/categories"
+@using MudBlazor
+@using SmartTourApp.Domain.Interfaces
+@inject ICategoryService CategoryService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<div class="page-header">
+    <div>
+        <MudText Typo="Typo.h4">Quản lý danh mục</MudText>
+        <MudText Typo="Typo.body2" Class="page-subtitle">Tổ chức nhóm POI để dễ dàng phân loại và báo cáo.</MudText>
+    </div>
+</div>
+
+<MudGrid>
+    <MudItem xs="12" sm="6">
+        <MudPaper Class="pa-4 form-card" Elevation="0">
+            <MudText Typo="Typo.h6" Class="mb-3">Thêm danh mục mới</MudText>
+            <MudTextField @bind-Value="_newName" Label="Tên danh mục" Variant="Variant.Outlined" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-3 action-button"
+                       OnClick="CreateCategory" Disabled="@string.IsNullOrWhiteSpace(_newName)">
+                Thêm
+            </MudButton>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<MudTable Items="_categories" Hover="true" Dense="true" Class="mt-4 data-table" Elevation="0">
+    <HeaderContent>
+        <MudTh>Tên</MudTh>
+        <MudTh>Số POI</MudTh>
+        <MudTh>Hành động</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Name</MudTd>
+        <MudTd>
+            <MudChip T="string" Color="Color.Info" Size="Size.Small">@context.PoiCount</MudChip>
+        </MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                           OnClick="() => DeleteCategory(context.Id)" Color="Color.Error" />
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<CategoryDto> _categories = new();
+    private string _newName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _categories = await CategoryService.GetAllAsync();
+    }
+
+    private async Task CreateCategory()
+    {
+        if (string.IsNullOrWhiteSpace(_newName)) return;
+        await CategoryService.CreateAsync(_newName);
+        _newName = "";
+        await LoadData();
+        Snackbar.Add("Đã thêm danh mục!", Severity.Success);
+    }
+
+    private async Task DeleteCategory(Guid id)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Xác nhận xóa", "Bạn có chắc muốn xóa danh mục này?",
+            yesText: "Xóa", cancelText: "Hủy");
+
+        if (confirmed == true)
+        {
+            await CategoryService.DeleteAsync(id);
+            await LoadData();
+            Snackbar.Add("Đã xóa!", Severity.Warning);
+        }
+    }
+}

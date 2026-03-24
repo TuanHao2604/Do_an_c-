@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:local="clr-namespace:SmartTourApp.Mobile"
+            x:Class="SmartTourApp.Mobile.MainPage"
+            BackgroundColor="{StaticResource PageBackground}"
+            BarBackgroundColor="{StaticResource Surface}"
+            BarTextColor="{StaticResource InkMuted}"
+            SelectedTabColor="{StaticResource Ink}"
+            UnselectedTabColor="{StaticResource InkMuted}">
+
+    <local:ExplorePage Title="Explore" IconImageSource="ic_explore.svg" />
+    <local:MapPage Title="Map" IconImageSource="ic_map.svg" />
+    <local:FavoritesPage Title="Favorites" IconImageSource="ic_heart.svg" />
+    <local:ProfilePage Title="Profile" IconImageSource="ic_profile.svg" />
+</TabbedPage>

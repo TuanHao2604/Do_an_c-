@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>SmartTourApp.Mobile</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <UseMauiMaps>true</UseMauiMaps>
+    <SingleProject>true</SingleProject>
+    <UseAppHost>false</UseAppHost>
+    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
+    <RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ApplicationTitle>SmartTour</ApplicationTitle>
+    <ApplicationId>com.smarttour.app</ApplicationId>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.8" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.3" />
+    <PackageReference Include="Microsoft.Maui.Controls.Maps" Version="8.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <MauiFont Include="Resources\\Fonts\\*.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <MauiImage Include="Resources\\Images\\*.svg" />
+  </ItemGroup>
+</Project>

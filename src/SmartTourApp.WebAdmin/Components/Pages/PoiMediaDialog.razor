@@ -1,0 +1,149 @@
+@using MudBlazor
+@using SmartTourApp.Domain.Interfaces
+@inject IPoiService PoiService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        @if (_poi == null)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else
+        {
+            <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+                <MudTabPanel Text="Hình ảnh" Icon="@Icons.Material.Filled.Image">
+                    <MudGrid>
+                        <MudItem xs="12" Class="d-flex align-end gap-2">
+                            <MudTextField @bind-Value="_newImageUrl" Label="URL hình ảnh" Variant="Variant.Outlined" FullWidth="true" />
+                            <MudCheckBox @bind-Value="_isThumbnail" Label="Là Thumbnail" />
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddImage" Disabled="string.IsNullOrWhiteSpace(_newImageUrl)">Thêm</MudButton>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTable Items="_poi.Images" Hover="true" Dense="true">
+                                <HeaderContent>
+                                    <MudTh>Hình ảnh</MudTh>
+                                    <MudTh>URL</MudTh>
+                                    <MudTh>Thumbnail</MudTh>
+                                    <MudTh>Hành động</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd><MudImage Src="@context.ImageUrl" Width="60" Height="40" ObjectFit="ObjectFit.Cover" /></MudTd>
+                                    <MudTd>@context.ImageUrl</MudTd>
+                                    <MudTd>
+                                        @if (context.IsThumbnail) { <MudIcon Icon="@Icons.Material.Filled.Check" Color="Color.Success"/> }
+                                    </MudTd>
+                                    <MudTd>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveImage(context.Id)" />
+                                    </MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+                
+                <MudTabPanel Text="Âm thanh" Icon="@Icons.Material.Filled.AudioFile">
+                    <MudGrid>
+                        <MudItem xs="12" sm="4">
+                            <MudSelect @bind-Value="_audioLang" Label="Ngôn ngữ" Variant="Variant.Outlined">
+                                <MudSelectItem Value="@("vi")">Tiếng Việt</MudSelectItem>
+                                <MudSelectItem Value="@("en")">Tiếng Anh</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="_newAudioUrl" Label="URL âm thanh" Variant="Variant.Outlined" FullWidth="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="2" Class="d-flex align-end">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddAudio" Disabled="string.IsNullOrWhiteSpace(_newAudioUrl)">Thêm</MudButton>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTable Items="_poi.AudioFiles" Hover="true" Dense="true">
+                                <HeaderContent>
+                                    <MudTh>Ngôn ngữ</MudTh>
+                                    <MudTh>URL</MudTh>
+                                    <MudTh>TTS</MudTh>
+                                    <MudTh>Hành động</MudTh>
+                                </HeaderContent>
+                                <RowTemplate Context="audio">
+                                    <MudTd>@audio.LanguageCode.ToUpper()</MudTd>
+                                    <MudTd>@audio.FileUrl</MudTd>
+                                    <MudTd>
+                                        @if (audio.IsTts) { <MudIcon Icon="@Icons.Material.Filled.Check" Color="Color.Info"/> }
+                                    </MudTd>
+                                    <MudTd>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveAudio(audio.Id)" />
+                                    </MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+            </MudTabs>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close" Color="Color.Default">Đóng</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public Guid PoiId { get; set; }
+
+    private PoiDetailDto? _poi;
+
+    // Image state
+    private string _newImageUrl = "";
+    private bool _isThumbnail = false;
+
+    // Audio state
+    private string _newAudioUrl = "";
+    private string _audioLang = "vi";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPoi();
+    }
+
+    private async Task LoadPoi()
+    {
+        _poi = await PoiService.GetByIdAsync(PoiId);
+    }
+
+    private async Task AddImage()
+    {
+        if (string.IsNullOrWhiteSpace(_newImageUrl)) return;
+        var sortOrder = _poi?.Images.Count ?? 0;
+        await PoiService.AddImageAsync(PoiId, _newImageUrl, sortOrder, _isThumbnail);
+        _newImageUrl = "";
+        _isThumbnail = false;
+        await LoadPoi();
+        Snackbar.Add("Đã thêm hình ảnh", Severity.Success);
+    }
+
+    private async Task RemoveImage(Guid imageId)
+    {
+        await PoiService.RemoveImageAsync(PoiId, imageId);
+        await LoadPoi();
+        Snackbar.Add("Đã xóa hình ảnh", Severity.Info);
+    }
+
+    private async Task AddAudio()
+    {
+        if (string.IsNullOrWhiteSpace(_newAudioUrl)) return;
+        var sortOrder = _poi?.AudioFiles.Count ?? 0;
+        await PoiService.AddAudioAsync(PoiId, _audioLang, _newAudioUrl, 0, sortOrder, false);
+        _newAudioUrl = "";
+        await LoadPoi();
+        Snackbar.Add("Đã thêm âm thanh", Severity.Success);
+    }
+
+    private async Task RemoveAudio(Guid audioId)
+    {
+        await PoiService.RemoveAudioAsync(PoiId, audioId);
+        await LoadPoi();
+        Snackbar.Add("Đã xóa âm thanh", Severity.Info);
+    }
+
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+}

@@ -1,0 +1,155 @@
+:root {
+  color-scheme: light;
+  --ink: #0f172a;
+  --ink-muted: #475569;
+  --brand: #0e7c86;
+  --brand-strong: #0b6b73;
+  --accent: #f59e0b;
+  --surface: #ffffff;
+  --surface-2: #f6f2eb;
+  --surface-3: #ece7df;
+  --border: #e2e8f0;
+  --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 18px 40px rgba(15, 23, 42, 0.12);
+  --radius-lg: 18px;
+  --radius-md: 14px;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, #fdfaf5 0%, transparent 55%),
+    radial-gradient(circle at 80% 20%, #e8f3f3 0%, transparent 40%),
+    linear-gradient(135deg, #f5f1ea 0%, #eff4f8 100%);
+  color: var(--ink);
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  letter-spacing: 0.1px;
+}
+
+.app-title {
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-main {
+  padding: 28px 32px 40px;
+}
+
+.mud-appbar {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.mud-appbar .mud-icon-button {
+  color: var(--ink);
+}
+
+.mud-drawer {
+  background: linear-gradient(180deg, #fbf9f4 0%, #f4efe7 100%);
+  border-right: 1px solid var(--border);
+}
+
+.mud-nav-link {
+  margin: 4px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mud-nav-link.active,
+.mud-nav-link.active:hover {
+  background: rgba(14, 124, 134, 0.12);
+  color: var(--ink);
+}
+
+.mud-nav-link:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-subtitle {
+  color: var(--ink-muted);
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-label {
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.stat-value {
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 28px;
+}
+
+.data-table {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table .mud-table-head {
+  background: var(--surface-2);
+}
+
+.data-table .mud-table-cell {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.action-button {
+  border-radius: 999px;
+  box-shadow: 0 12px 26px rgba(14, 124, 134, 0.24);
+}
+
+.form-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-chip {
+  background: rgba(14, 124, 134, 0.12);
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+
+.mud-dialog {
+  border-radius: var(--radius-lg);
+}
+
+.mud-paper {
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 900px) {
+  .app-main {
+    padding: 20px 18px 32px;
+  }
+}

@@ -1,0 +1,14 @@
+@using MudBlazor
+
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="typeof(Layout.MainLayout)">
+            <MudText Typo="Typo.h4" Class="mt-8 mx-auto" Align="Align.Center">
+                Không tìm thấy trang 😕
+            </MudText>
+        </LayoutView>
+    </NotFound>
+</Router>

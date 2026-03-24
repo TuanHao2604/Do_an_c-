@@ -1,0 +1,112 @@
+@using MudBlazor
+@using SmartTourApp.Domain.Interfaces
+@inject IPoiService PoiService
+
+<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_name" Label="Tên POI (VI)" Required="true" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_nameEn" Label="Tên POI (EN)" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_description" Label="Mô tả (VI)" Lines="3" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_address" Label="Địa chỉ" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="_categoryId" Label="Danh mục" Required="true" Variant="Variant.Outlined">
+                    @foreach (var cat in Categories)
+                    {
+                        <MudSelectItem Value="cat.Id">@cat.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="_latitude" Label="Latitude" Step="0.0001" Format="F6" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="_longitude" Label="Longitude" Step="0.0001" Format="F6" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="_geofenceRadius" Label="Geofence (m)" Step="10.0" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudCheckBox @bind-Value="_isActive" Label="Hoạt động" Color="Color.Primary" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudCheckBox @bind-Value="_isFeatured" Label="Nổi bật" Color="Color.Warning" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Lưu</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public List<CategoryDto> Categories { get; set; } = new();
+    [Parameter] public PoiDetailDto? Poi { get; set; }
+
+    private string _name = "", _nameEn = "", _description = "", _address = "";
+    private Guid _categoryId;
+    private double _latitude = 10.762622, _longitude = 106.660172, _geofenceRadius = 100;
+    private bool _isActive = true, _isFeatured = false;
+
+    protected override void OnParametersSet()
+    {
+        if (Poi is not null)
+        {
+            _latitude = Poi.Latitude;
+            _longitude = Poi.Longitude;
+            _geofenceRadius = Poi.GeofenceRadius;
+            _categoryId = Poi.CategoryId;
+            _isActive = Poi.IsActive;
+            _isFeatured = Poi.IsFeatured;
+
+            var viContent = Poi.Contents.FirstOrDefault(c => c.LanguageCode == "vi");
+            var enContent = Poi.Contents.FirstOrDefault(c => c.LanguageCode == "en");
+
+            _name = viContent?.Name ?? "";
+            _description = viContent?.Description ?? "";
+            _address = viContent?.Address ?? "";
+            _nameEn = enContent?.Name ?? "";
+        }
+
+        if (_categoryId == Guid.Empty && Categories.Any())
+            _categoryId = Categories.First().Id;
+    }
+
+    private async Task Save()
+    {
+        var contents = new List<CreatePoiContentRequest>
+        {
+            new("vi", _name, _address, _description, null)
+        };
+
+        if (!string.IsNullOrWhiteSpace(_nameEn))
+            contents.Add(new("en", _nameEn, _address, null, null));
+
+        if (Poi is null)
+        {
+            await PoiService.CreateAsync(new CreatePoiRequest(
+                _latitude, _longitude, _geofenceRadius,
+                _categoryId, null, _isActive, _isFeatured, contents));
+        }
+        else
+        {
+            await PoiService.UpdateAsync(Poi.Id, new UpdatePoiRequest(
+                _latitude, _longitude, _geofenceRadius,
+                _categoryId, null, _isActive, _isFeatured, contents));
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

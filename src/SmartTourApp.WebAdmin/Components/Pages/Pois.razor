@@ -1,0 +1,145 @@
+@page "/pois"
+@using MudBlazor
+@using SmartTourApp.Domain.Interfaces
+@inject IPoiService PoiService
+@inject ICategoryService CategoryService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<div class="page-header">
+    <div>
+        <MudText Typo="Typo.h4">Quản lý POI</MudText>
+        <MudText Typo="Typo.body2" Class="page-subtitle">Tạo mới, cập nhật và kiểm soát trạng thái điểm đến.</MudText>
+    </div>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+               OnClick="OpenCreateDialog" Class="action-button">
+        Thêm POI mới
+    </MudButton>
+</div>
+
+<MudTable Items="_pois" Hover="true" Dense="true" Loading="_loading" Elevation="0" Class="data-table">
+    <HeaderContent>
+        <MudTh>Tên (VI)</MudTh>
+        <MudTh>Danh mục</MudTh>
+        <MudTh>Tọa độ</MudTh>
+        <MudTh>Nổi bật</MudTh>
+        <MudTh>Trạng thái</MudTh>
+        <MudTh>Đánh giá</MudTh>
+        <MudTh>Hành động</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Contents.FirstOrDefault()?.Name</MudTd>
+        <MudTd>@context.CategoryName</MudTd>
+        <MudTd>@context.Latitude.ToString("F4"), @context.Longitude.ToString("F4")</MudTd>
+        <MudTd>
+            @if (context.IsFeatured)
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Star" Color="Color.Warning" />
+            }
+        </MudTd>
+        <MudTd>
+            <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Error)" Size="Size.Small">
+                @(context.IsActive ? "Hoạt động" : "Ẩn")
+            </MudChip>
+        </MudTd>
+        <MudTd>
+            @if (context.AverageRating.HasValue)
+            {
+                <MudRating SelectedValue="@((int)Math.Round(context.AverageRating.Value))" ReadOnly="true" Size="Size.Small" />
+            }
+            else
+            {
+                <MudText Typo="Typo.caption">—</MudText>
+            }
+        </MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.PermMedia" Size="Size.Small"
+                           OnClick="() => OpenMediaDialog(context)" Color="Color.Info" Title="Quản lý Media" />
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                           OnClick="() => OpenEditDialog(context)" Color="Color.Primary" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                           OnClick="() => DeletePoi(context.Id)" Color="Color.Error" />
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<PoiDetailDto> _pois = new();
+    private List<CategoryDto> _categories = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _loading = true;
+        _pois = await PoiService.GetAllAsync();
+        _categories = await CategoryService.GetAllAsync();
+        _loading = false;
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var parameters = new DialogParameters
+        {
+            ["Categories"] = _categories,
+            ["Poi"] = (PoiDetailDto?)null
+        };
+
+        var dialog = await DialogService.ShowAsync<PoiDialog>("Thêm POI mới", parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is not null && !result.Canceled)
+        {
+            await LoadData();
+            Snackbar.Add("Đã thêm POI!", Severity.Success);
+        }
+    }
+
+    private async Task OpenEditDialog(PoiDetailDto poi)
+    {
+        var parameters = new DialogParameters
+        {
+            ["Categories"] = _categories,
+            ["Poi"] = poi
+        };
+
+        var dialog = await DialogService.ShowAsync<PoiDialog>("Chỉnh sửa POI", parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is not null && !result.Canceled)
+        {
+            await LoadData();
+            Snackbar.Add("Đã cập nhật!", Severity.Success);
+        }
+    }
+
+    private async Task OpenMediaDialog(PoiDetailDto poi)
+    {
+        var parameters = new DialogParameters { ["PoiId"] = poi.Id };
+        var dialog = await DialogService.ShowAsync<PoiMediaDialog>("Quản lý Media: " + poi.Contents.FirstOrDefault()?.Name, parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true });
+
+        await dialog.Result;
+        await LoadData();
+    }
+
+    private async Task DeletePoi(Guid id)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Xác nhận xóa", "Bạn có chắc muốn xóa POI này?",
+            yesText: "Xóa", cancelText: "Hủy");
+
+        if (confirmed == true)
+        {
+            await PoiService.DeleteAsync(id);
+            await LoadData();
+            Snackbar.Add("Đã xóa!", Severity.Warning);
+        }
+    }
+}

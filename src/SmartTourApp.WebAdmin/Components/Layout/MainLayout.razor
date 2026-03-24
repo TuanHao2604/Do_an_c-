@@ -1,0 +1,67 @@
+@inherits LayoutComponentBase
+@using MudBlazor
+
+<MudThemeProvider Theme="_theme" IsDarkMode="false" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout Class="app-shell">
+    <MudAppBar Elevation="0" Color="Color.Transparent">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                       Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudText Typo="Typo.h6" Class="ml-3 app-title">SmartTour Admin</MudText>
+        <MudSpacer />
+        <MudChip Color="Color.Primary" Variant="Variant.Outlined" Class="mr-4 badge-chip">
+            Quản trị hệ thống
+        </MudChip>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="0">
+        <MudNavMenu>
+            <MudNavLink Href="/" Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Dashboard">
+                Trang chủ
+            </MudNavLink>
+            <MudNavLink Href="/pois" Match="NavLinkMatch.Prefix"
+                        Icon="@Icons.Material.Filled.Place">
+                Quản lý POI
+            </MudNavLink>
+            <MudNavLink Href="/categories" Match="NavLinkMatch.Prefix"
+                        Icon="@Icons.Material.Filled.Category">
+                Danh mục
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="app-main">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+
+    private readonly MudTheme _theme = new()
+    {
+        Palette = new Palette
+        {
+            Primary = "#0E7C86",
+            Secondary = "#F59E0B",
+            Background = "#F6F2EB",
+            Surface = "#FFFFFF",
+            AppbarBackground = "#FFFFFF",
+            TextPrimary = "#0F172A",
+            TextSecondary = "#475569",
+        },
+        Typography = new Typography
+        {
+            Default = new Default { FontFamily = new[] { "Source Sans 3", "Segoe UI", "sans-serif" } },
+            H4 = new H4 { FontFamily = new[] { "Sora", "Segoe UI", "sans-serif" }, FontWeight = 600 },
+            H5 = new H5 { FontFamily = new[] { "Sora", "Segoe UI", "sans-serif" }, FontWeight = 600 },
+            H6 = new H6 { FontFamily = new[] { "Sora", "Segoe UI", "sans-serif" }, FontWeight = 600 }
+        }
+    };
+
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+}

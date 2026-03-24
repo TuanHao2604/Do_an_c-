@@ -1,0 +1,78 @@
+@page "/"
+@using MudBlazor
+@using SmartTourApp.Domain.Interfaces
+@inject IPoiService PoiService
+@inject ICategoryService CategoryService
+
+<div class="page-header">
+    <div>
+        <MudText Typo="Typo.h4">Tổng quan hệ thống</MudText>
+        <MudText Typo="Typo.body2" Class="page-subtitle">Theo dõi dữ liệu điểm đến và trạng thái hoạt động.</MudText>
+    </div>
+    <MudChip Variant="Variant.Outlined" Color="Color.Primary" Class="badge-chip">Cập nhật theo thời gian thực</MudChip>
+</div>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="3">
+        <MudPaper Class="pa-4 stat-card" Elevation="0">
+            <MudText Typo="Typo.subtitle2" Class="stat-label">Tổng POI</MudText>
+            <MudText Typo="Typo.h4" Class="stat-value">@_poiCount</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudPaper Class="pa-4 stat-card" Elevation="0">
+            <MudText Typo="Typo.subtitle2" Class="stat-label">Danh mục</MudText>
+            <MudText Typo="Typo.h4" Class="stat-value">@_categoryCount</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudPaper Class="pa-4 stat-card" Elevation="0">
+            <MudText Typo="Typo.subtitle2" Class="stat-label">POI nổi bật</MudText>
+            <MudText Typo="Typo.h4" Class="stat-value">@_featuredCount</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudPaper Class="pa-4 stat-card" Elevation="0">
+            <MudText Typo="Typo.subtitle2" Class="stat-label">POI đang ẩn</MudText>
+            <MudText Typo="Typo.h4" Class="stat-value">@_inactiveCount</MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<MudText Typo="Typo.h5" Class="mt-6 mb-3">POI cập nhật gần đây</MudText>
+
+<MudTable Items="_recentPois" Hover="true" Dense="true" Elevation="0" Class="data-table">
+    <HeaderContent>
+        <MudTh>Tên</MudTh>
+        <MudTh>Danh mục</MudTh>
+        <MudTh>Tọa độ</MudTh>
+        <MudTh>Trạng thái</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Contents.FirstOrDefault()?.Name</MudTd>
+        <MudTd>@context.CategoryName</MudTd>
+        <MudTd>@context.Latitude.ToString("F4"), @context.Longitude.ToString("F4")</MudTd>
+        <MudTd>
+            <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Error)" Size="Size.Small">
+                @(context.IsActive ? "Hoạt động" : "Ẩn")
+            </MudChip>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private int _poiCount, _categoryCount, _featuredCount, _inactiveCount;
+    private List<PoiDetailDto> _recentPois = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var pois = await PoiService.GetAllAsync();
+        var categories = await CategoryService.GetAllAsync();
+
+        _poiCount = pois.Count;
+        _categoryCount = categories.Count;
+        _featuredCount = pois.Count(p => p.IsFeatured);
+        _inactiveCount = pois.Count(p => !p.IsActive);
+        _recentPois = pois.Take(10).ToList();
+    }
+}

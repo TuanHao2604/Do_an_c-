@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SmartTourApp.Mobile.FavoritesPage"
+             BackgroundColor="{StaticResource PageBackground}">
+    <Grid RowDefinitions="Auto,*" Padding="20,16">
+        <Label Text="Favorites" FontSize="24" FontFamily="UbuntuBold" />
+
+        <VerticalStackLayout Grid.Row="1" Spacing="16"
+                             HorizontalOptions="Center" VerticalOptions="Center">
+            <Frame WidthRequest="96" HeightRequest="96" CornerRadius="48"
+                   BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
+                   HasShadow="False">
+                <Image Source="ic_heart.svg" HeightRequest="36" WidthRequest="36"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Frame>
+            <Label Text="Save your favorites" FontSize="18" FontFamily="UbuntuMedium"
+                   HorizontalOptions="Center" />
+            <Label Text="Tap the heart icon on any place or destination to add it to this list."
+                   FontSize="12" TextColor="{StaticResource InkMuted}"
+                   HorizontalTextAlignment="Center" />
+            <Button Text="Start exploring" BackgroundColor="{StaticResource Ink}" Clicked="OnStartExploringClicked" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
