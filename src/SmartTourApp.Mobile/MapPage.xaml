@@ -29,11 +29,11 @@
             </Frame>
         </Grid>
 
-        <Grid Grid.Row="1" Padding="20,6,20,20" RowDefinitions="*,Auto" RowSpacing="12">
+        <Grid Grid.Row="1" Padding="20,10,20,20" RowDefinitions="*,Auto" RowSpacing="12">
             <Grid Grid.Row="0">
                 <maps:Map x:Name="PoiMap" MapType="Street" IsShowingUser="True" />
 
-                <VerticalStackLayout Spacing="12" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,10,10">
+                <VerticalStackLayout Spacing="12" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,16,16">
                     <Frame WidthRequest="48" HeightRequest="48" CornerRadius="24"
                            BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
                            HasShadow="True">

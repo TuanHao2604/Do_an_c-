@@ -37,13 +37,13 @@
                            FontSize="11" TextColor="{StaticResource InkMuted}" />
                 </Frame>
                 <Button Text="Dong bo" FontSize="12" Clicked="OnSyncClicked"
-                        BackgroundColor="{StaticResource Ink}" />
+                        BackgroundColor="{StaticResource Ink}" HeightRequest="36" CornerRadius="18" />
                 <Button Text="Gan toi" FontSize="12" Clicked="OnNearbyClicked"
                         BackgroundColor="{StaticResource Accent}"
-                        TextColor="{StaticResource Ink}" />
+                        TextColor="{StaticResource Ink}" HeightRequest="36" CornerRadius="18" />
                 <Button Text="Quet QR" FontSize="12" Clicked="OnQrClicked"
                         BackgroundColor="{StaticResource Surface}"
-                        TextColor="{StaticResource Ink}" />
+                        TextColor="{StaticResource Ink}" HeightRequest="36" CornerRadius="18" />
             </Grid>
 
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalOptions="Center">
@@ -66,37 +66,37 @@
                            BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
                            AbsoluteLayout.LayoutBounds="0.2,0.35,-1,-1"
                            AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="North America" FontSize="12" FontFamily="UbuntuMedium" />
+                        <Label Text="North America" FontSize="10" FontFamily="UbuntuMedium" />
                     </Frame>
                     <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
                            BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
                            AbsoluteLayout.LayoutBounds="0.22,0.7,-1,-1"
                            AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="South America" FontSize="12" FontFamily="UbuntuMedium" />
+                        <Label Text="South America" FontSize="10" FontFamily="UbuntuMedium" />
                     </Frame>
                     <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
                            BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
                            AbsoluteLayout.LayoutBounds="0.55,0.35,-1,-1"
                            AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="Europe" FontSize="12" FontFamily="UbuntuMedium" />
+                        <Label Text="Europe" FontSize="10" FontFamily="UbuntuMedium" />
                     </Frame>
                     <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
                            BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
                            AbsoluteLayout.LayoutBounds="0.55,0.6,-1,-1"
                            AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="Africa" FontSize="12" FontFamily="UbuntuMedium" />
+                        <Label Text="Africa" FontSize="10" FontFamily="UbuntuMedium" />
                     </Frame>
                     <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
                            BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
                            AbsoluteLayout.LayoutBounds="0.78,0.38,-1,-1"
                            AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="Asia" FontSize="12" FontFamily="UbuntuMedium" />
+                        <Label Text="Asia" FontSize="10" FontFamily="UbuntuMedium" />
                     </Frame>
                     <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
                            BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
                            AbsoluteLayout.LayoutBounds="0.82,0.72,-1,-1"
                            AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="Oceania" FontSize="12" FontFamily="UbuntuMedium" />
+                        <Label Text="Oceania" FontSize="10" FontFamily="UbuntuMedium" />
                     </Frame>
                 </AbsoluteLayout>
             </Frame>

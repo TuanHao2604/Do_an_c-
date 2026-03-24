@@ -65,27 +65,27 @@
             <Frame CornerRadius="16" Padding="0" BackgroundColor="{StaticResource Surface}"
                    BorderColor="{StaticResource Border}" HasShadow="False">
                 <VerticalStackLayout Spacing="0">
-                    <Grid ColumnDefinitions="*,Auto" Padding="16,12">
+                    <Grid ColumnDefinitions="*,Auto" Padding="16,16">
                         <Label Text="Preferred languages" FontSize="13" />
                         <Label Grid.Column="1" Text=">" FontSize="16" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="*,Auto" Padding="16,12">
+                    <Grid ColumnDefinitions="*,Auto" Padding="16,16">
                         <Label Text="Application theme" FontSize="13" />
                         <Label Grid.Column="1" Text="Light" FontSize="12" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="*,Auto" Padding="16,12">
+                    <Grid ColumnDefinitions="*,Auto" Padding="16,16">
                         <Label Text="Temperature" FontSize="13" />
                         <Label Grid.Column="1" Text="C" FontSize="12" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="*,Auto" Padding="16,12">
+                    <Grid ColumnDefinitions="*,Auto" Padding="16,16">
                         <Label Text="Distance" FontSize="13" />
                         <Label Grid.Column="1" Text="km" FontSize="12" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="*,Auto" Padding="16,12">
+                    <Grid ColumnDefinitions="*,Auto" Padding="16,16">
                         <Label Text="Clear visited history (0)" FontSize="13" TextColor="{StaticResource InkMuted}" />
                         <Label Grid.Column="1" Text=">" FontSize="16" TextColor="{StaticResource InkMuted}" />
                     </Grid>
@@ -95,43 +95,43 @@
             <Frame CornerRadius="16" Padding="0" BackgroundColor="{StaticResource Surface}"
                    BorderColor="{StaticResource Border}" HasShadow="False">
                 <VerticalStackLayout Spacing="0">
-                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,16" ColumnSpacing="12">
                         <Image Source="ic_crown.svg" HeightRequest="18" WidthRequest="18" />
                         <Label Text="Offline guides" FontSize="13" VerticalOptions="Center" />
                         <Label Grid.Column="2" Text=">" FontSize="16" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,16" ColumnSpacing="12">
                         <Image Source="ic_explore.svg" HeightRequest="18" WidthRequest="18" />
                         <Label Text="Send me travel tips" FontSize="13" VerticalOptions="Center" />
                         <Switch Grid.Column="2" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,16" ColumnSpacing="12">
                         <Image Source="ic_map.svg" HeightRequest="18" WidthRequest="18" />
                         <Label Text="Restore purchases" FontSize="13" VerticalOptions="Center" />
                         <Label Grid.Column="2" Text=">" FontSize="16" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,16" ColumnSpacing="12">
                         <Image Source="ic_heart.svg" HeightRequest="18" WidthRequest="18" />
                         <Label Text="Rate the App" FontSize="13" VerticalOptions="Center" />
                         <Label Grid.Column="2" Text=">" FontSize="16" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,16" ColumnSpacing="12">
                         <Image Source="ic_profile.svg" HeightRequest="18" WidthRequest="18" />
                         <Label Text="Share feedback" FontSize="13" VerticalOptions="Center" />
                         <Label Grid.Column="2" Text=">" FontSize="16" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,16" ColumnSpacing="12">
                         <Image Source="ic_search.svg" HeightRequest="18" WidthRequest="18" />
                         <Label Text="About application" FontSize="13" VerticalOptions="Center" />
                         <Label Grid.Column="2" Text=">" FontSize="16" TextColor="{StaticResource InkMuted}" />
                     </Grid>
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="12">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,16" ColumnSpacing="12">
                         <Image Source="ic_target.svg" HeightRequest="18" WidthRequest="18" />
                         <Label Text="Delete account" FontSize="13" VerticalOptions="Center" />
                         <Label Grid.Column="2" Text=">" FontSize="16" TextColor="{StaticResource InkMuted}" />
