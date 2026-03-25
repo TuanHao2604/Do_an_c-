@@ -1,0 +1,64 @@
+@page "/service-packages"
+@using MudBlazor
+@using SmartTourApp.Domain.Entities
+@using SmartTourApp.Domain.Interfaces
+@inject IServicePackageService PackageService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pt-6">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudText Typo="Typo.h4">Gói dịch vụ</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="ShowAddDialog">
+            Thêm gói mới
+        </MudButton>
+    </MudStack>
+
+    <MudTable Items="_packages" Hover="true" Elevation="1">
+        <HeaderContent>
+            <MudTh>Mã gói</MudTh>
+            <MudTh>Tên</MudTh>
+            <MudTh>Giá</MudTh>
+            <MudTh>Thời hạn</MudTh>
+            <MudTh>Mô tả</MudTh>
+            <MudTh>Thao tác</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Code</MudTd>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>@context.Price.ToString("N0") ₫</MudTd>
+            <MudTd>@context.DurationDays ngày</MudTd>
+            <MudTd>@(context.Description ?? "—")</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeletePackage(context.Id)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+@code {
+    private List<ServicePackage> _packages = new();
+
+    protected override async Task OnInitializedAsync() => _packages = await PackageService.GetAllActiveAsync();
+
+    private async Task ShowAddDialog()
+    {
+        var parameters = new DialogParameters<ServicePackageDialog>();
+        var dialog = await DialogService.ShowAsync<ServicePackageDialog>("Thêm gói dịch vụ", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: ServicePackage pkg })
+        {
+            await PackageService.CreateAsync(pkg);
+            _packages = await PackageService.GetAllActiveAsync();
+            Snackbar.Add("Đã thêm gói dịch vụ!", Severity.Success);
+        }
+    }
+
+    private async Task DeletePackage(Guid id)
+    {
+        await PackageService.DeleteAsync(id);
+        _packages = await PackageService.GetAllActiveAsync();
+        Snackbar.Add("Đã xóa gói dịch vụ!", Severity.Warning);
+    }
+}

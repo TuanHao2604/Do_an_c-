@@ -3,23 +3,89 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SmartTourApp.Mobile.FavoritesPage"
              BackgroundColor="{StaticResource PageBackground}">
-    <Grid RowDefinitions="Auto,*" Padding="20,16">
-        <Label Text="Favorites" FontSize="24" FontFamily="UbuntuBold" />
+    <Grid RowDefinitions="Auto,*">
 
-        <VerticalStackLayout Grid.Row="1" Spacing="16"
-                             HorizontalOptions="Center" VerticalOptions="Center">
-            <Frame WidthRequest="96" HeightRequest="96" CornerRadius="48"
-                   BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                   HasShadow="False">
-                <Image Source="ic_heart.svg" HeightRequest="36" WidthRequest="36"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Frame>
-            <Label Text="Save your favorites" FontSize="18" FontFamily="UbuntuMedium"
-                   HorizontalOptions="Center" />
-            <Label Text="Tap the heart icon on any place or destination to add it to this list."
-                   FontSize="12" TextColor="{StaticResource InkMuted}"
-                   HorizontalTextAlignment="Center" />
-            <Button Text="Start exploring" BackgroundColor="{StaticResource Ink}" Clicked="OnStartExploringClicked" />
-        </VerticalStackLayout>
+        <!-- ═══ HEADER ═══ -->
+        <Grid Padding="20,14,20,10" ColumnDefinitions="*,Auto">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Label Text="❤️ Yêu thích" FontSize="18" FontFamily="UbuntuBold" TextColor="White" />
+            <Label x:Name="FavCountLabel" Grid.Column="1" Text="0 mục" FontSize="12"
+                   TextColor="#BBFFFFFF" VerticalOptions="Center" />
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <!-- ═══ EMPTY STATE ═══ -->
+            <VerticalStackLayout x:Name="EmptyState" Spacing="16"
+                                 HorizontalOptions="Center" VerticalOptions="Center" IsVisible="True">
+                <Frame WidthRequest="100" HeightRequest="100" CornerRadius="50"
+                       BackgroundColor="{StaticResource PrimarySoft}" Padding="0"
+                       HasShadow="False" BorderColor="Transparent" HorizontalOptions="Center">
+                    <Label Text="❤️" FontSize="40" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+                <Label Text="Chưa có mục yêu thích" FontSize="18" FontFamily="UbuntuBold"
+                       HorizontalOptions="Center" />
+                <Label Text="Nhấn biểu tượng ❤ trên bất kỳ điểm đến nào&#10;để thêm vào danh sách này."
+                       FontSize="13" TextColor="{StaticResource InkMuted}"
+                       HorizontalTextAlignment="Center" LineHeight="1.5" />
+                <Button Text="🧭 Bắt đầu khám phá" Clicked="OnStartExploringClicked"
+                        CornerRadius="22" Padding="24,12" HorizontalOptions="Center">
+                    <Button.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#0E6EB8" Offset="0.0" />
+                            <GradientStop Color="#1A9DE8" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Button.Background>
+                </Button>
+            </VerticalStackLayout>
+
+            <!-- ═══ FAVORITES LIST ═══ -->
+            <ScrollView x:Name="FavoritesScroll" IsVisible="False">
+                <VerticalStackLayout x:Name="FavoritesListLayout" Padding="16,12" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Frame CornerRadius="16" Padding="12" HasShadow="True"
+                                   BackgroundColor="{StaticResource Surface}"
+                                   BorderColor="{StaticResource Border}">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnFavoriteTapped" CommandParameter="{Binding .}" />
+                                </Frame.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <Frame WidthRequest="48" HeightRequest="48" CornerRadius="14"
+                                           Padding="0" HasShadow="False" BorderColor="Transparent">
+                                        <Frame.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#EF4444" Offset="0.0" />
+                                                <GradientStop Color="#FF6B8A" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Frame.Background>
+                                        <Label Text="❤" FontSize="18" TextColor="White"
+                                               HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Frame>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                                        <Label Text="{Binding PoiName}" FontSize="14" FontFamily="UbuntuMedium" />
+                                        <Label Text="{Binding AddedAt, StringFormat='{0:dd/MM/yyyy}'}" FontSize="11"
+                                               TextColor="{StaticResource InkMuted}" />
+                                    </VerticalStackLayout>
+                                    <Frame Grid.Column="2" WidthRequest="30" HeightRequest="30" CornerRadius="10"
+                                           BackgroundColor="#0A000000" Padding="0" HasShadow="False"
+                                           BorderColor="Transparent" VerticalOptions="Center">
+                                        <Frame.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnRemoveFavoriteTapped" CommandParameter="{Binding .}" />
+                                        </Frame.GestureRecognizers>
+                                        <Label Text="✕" FontSize="12" TextColor="{StaticResource InkMuted}"
+                                               HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Frame>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
     </Grid>
 </ContentPage>

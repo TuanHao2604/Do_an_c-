@@ -19,6 +19,7 @@ public partial class MapPage : ContentPage
     private double _lastClusterSize;
     private bool _mapReady;
     private readonly Dictionary<Pin, ClusterInfo> _pinLookup = new();
+    private LocalPoi? _selectedPoi;
 
     public MapPage()
     {
@@ -30,7 +31,6 @@ public partial class MapPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await RefreshHeatmapAsync();
         await LoadMapDataAsync();
     }
 
@@ -38,50 +38,23 @@ public partial class MapPage : ContentPage
     {
         _cachedPois.Clear();
         _cachedPois.AddRange(await _localDb.GetAllPoisAsync());
+        _cachedHeatmap.Clear();
+        _cachedHeatmap.AddRange(await _localDb.GetHeatmapAsync(12));
 
         var last = await _localDb.GetLatestLocationLogAsync();
         _lastLocation = last is null ? null : new Location(last.Latitude, last.Longitude);
-        var center = _lastLocation is null
-            ? new Location(10.7764, 106.7009)
-            : _lastLocation;
+        var center = _lastLocation ?? new Location(10.7764, 106.7009);
 
         var span = MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(4));
         PoiMap.MoveToRegion(span);
         UpdatePinsAndOverlays(span);
     }
 
-    private async Task RefreshHeatmapAsync()
-    {
-        _cachedHeatmap.Clear();
-        _cachedHeatmap.AddRange(await _localDb.GetHeatmapAsync(12));
-        BindableLayout.SetItemsSource(MapHeatmapList, _cachedHeatmap);
-        MapHeatmapEmpty.IsVisible = _cachedHeatmap.Count == 0;
-
-        var last = await _localDb.GetLatestLocationLogAsync();
-        _lastLocation = last is null ? _lastLocation : new Location(last.Latitude, last.Longitude);
-        MapLastLocationLabel.Text = last is null
-            ? "Vi tri gan nhat: --"
-            : $"Vi tri gan nhat: {last.Latitude:0.0000}, {last.Longitude:0.0000}";
-
-        var span = PoiMap.VisibleRegion;
-        if (span is not null)
-        {
-            UpdatePinsAndOverlays(span);
-        }
-    }
-
     private void OnMapPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(MapControl.VisibleRegion))
-        {
-            return;
-        }
-
+        if (e.PropertyName != nameof(MapControl.VisibleRegion)) return;
         var span = PoiMap.VisibleRegion;
-        if (span is null)
-        {
-            return;
-        }
+        if (span is null) return;
 
         var clusterSize = GetClusterSize(span);
         if (!_mapReady || Math.Abs(clusterSize - _lastClusterSize) > 0.0001)
@@ -116,33 +89,34 @@ public partial class MapPage : ContentPage
                 if (cluster.Items.Count == 1)
                 {
                     var poi = cluster.Items[0];
-                    PoiMap.Pins.Add(new Pin
+                    var pin = new Pin
                     {
                         Label = poi.Name,
-                        Address = poi.Address,
+                        Address = poi.CategoryName,
                         Type = PinType.Place,
                         Location = new Location(poi.Latitude, poi.Longitude)
-                    });
-                    var singlePin = PoiMap.Pins.Last();
-                    singlePin.MarkerClicked += OnPinMarkerClicked;
-                    _pinLookup[singlePin] = new ClusterInfo
+                    };
+                    pin.MarkerClicked += OnPinMarkerClicked;
+                    PoiMap.Pins.Add(pin);
+                    _pinLookup[pin] = new ClusterInfo
                     {
                         IsCluster = false,
-                        Center = singlePin.Location
+                        Center = pin.Location,
+                        PoiId = poi.Id,
                     };
                     continue;
                 }
 
                 var nameList = string.Join(", ", cluster.Items.Take(3).Select(x => x.Name));
-                PoiMap.Pins.Add(new Pin
+                var clusterPin = new Pin
                 {
                     Label = $"{cluster.Items.Count} POI",
                     Address = nameList,
                     Type = PinType.Generic,
                     Location = new Location(cluster.Lat, cluster.Lng)
-                });
-                var clusterPin = PoiMap.Pins.Last();
+                };
                 clusterPin.MarkerClicked += OnPinMarkerClicked;
+                PoiMap.Pins.Add(clusterPin);
                 _pinLookup[clusterPin] = new ClusterInfo
                 {
                     IsCluster = true,
@@ -152,25 +126,24 @@ public partial class MapPage : ContentPage
             }
         }
 
+        // Heatmap circles
         foreach (var cell in _cachedHeatmap)
         {
             var coord = ParseCellKey(cell.CellKey);
-            if (coord is null)
-            {
-                continue;
-            }
+            if (coord is null) continue;
 
             var radius = Math.Min(300, 80 + cell.Count * 30);
             PoiMap.MapElements.Add(new Circle
             {
                 Center = new Location(coord.Value.Lat, coord.Value.Lng),
                 Radius = new Distance(radius),
-                FillColor = Color.FromRgba(243, 194, 68, 60),
-                StrokeColor = Color.FromRgba(243, 194, 68, 120),
+                FillColor = Color.FromRgba(14, 110, 184, 40),
+                StrokeColor = Color.FromRgba(14, 110, 184, 80),
                 StrokeWidth = 1
             });
         }
 
+        // Nearest POI highlight
         if (_lastLocation is not null && _cachedPois.Count > 0)
         {
             var nearest = _cachedPois
@@ -184,11 +157,60 @@ public partial class MapPage : ContentPage
                 {
                     Center = new Location(nearest.Poi.Latitude, nearest.Poi.Longitude),
                     Radius = new Distance(80),
-                    FillColor = Color.FromRgba(243, 194, 68, 80),
-                    StrokeColor = Color.FromRgba(243, 194, 68, 200),
+                    FillColor = Color.FromRgba(14, 110, 184, 50),
+                    StrokeColor = Color.FromRgba(14, 110, 184, 150),
                     StrokeWidth = 2
                 });
             }
+        }
+    }
+
+    private void OnPinMarkerClicked(object? sender, PinClickedEventArgs e)
+    {
+        if (sender is not Pin pin || !_pinLookup.TryGetValue(pin, out var info)) return;
+
+        if (info.IsCluster)
+        {
+            e.HideInfoWindow = true;
+            var span = PoiMap.VisibleRegion;
+            var currentRadius = span?.Radius.Kilometers ?? 2.0;
+            var nextRadius = Math.Max(0.3, currentRadius / 2);
+            PoiMap.MoveToRegion(MapSpan.FromCenterAndRadius(info.Center, Distance.FromKilometers(nextRadius)));
+            return;
+        }
+
+        // Show preview card for single POI
+        e.HideInfoWindow = true;
+        _selectedPoi = _cachedPois.FirstOrDefault(p => p.Id == info.PoiId);
+        if (_selectedPoi != null)
+        {
+            PreviewPoiName.Text = _selectedPoi.Name;
+            PreviewPoiCategory.Text = _selectedPoi.CategoryName;
+            PreviewPoiCoords.Text = $"{_selectedPoi.Latitude:F4}, {_selectedPoi.Longitude:F4}";
+            PoiPreviewCard.IsVisible = true;
+        }
+    }
+
+    private void OnPreviewClose(object? sender, TappedEventArgs e)
+    {
+        PoiPreviewCard.IsVisible = false;
+        _selectedPoi = null;
+    }
+
+    private async void OnPreviewDetailClicked(object? sender, EventArgs e)
+    {
+        if (_selectedPoi != null)
+        {
+            await Navigation.PushAsync(new PoiDetailPage(_selectedPoi, _localDb));
+        }
+    }
+
+    private async void OnPreviewListenClicked(object? sender, EventArgs e)
+    {
+        if (_selectedPoi != null)
+        {
+            var text = _selectedPoi.Description ?? _selectedPoi.Name;
+            await TextToSpeech.SpeakAsync(text);
         }
     }
 
@@ -201,21 +223,9 @@ public partial class MapPage : ContentPage
     private static (double Lat, double Lng)? ParseCellKey(string cellKey)
     {
         var parts = cellKey.Split(',');
-        if (parts.Length != 2)
-        {
-            return null;
-        }
-
-        if (!double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat))
-        {
-            return null;
-        }
-
-        if (!double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var lng))
-        {
-            return null;
-        }
-
+        if (parts.Length != 2) return null;
+        if (!double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat)) return null;
+        if (!double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var lng)) return null;
         return (lat, lng);
     }
 
@@ -228,40 +238,14 @@ public partial class MapPage : ContentPage
         return $"{latKey},{lngKey}";
     }
 
-    private void OnPinMarkerClicked(object? sender, PinClickedEventArgs e)
-    {
-        if (sender is not Pin pin || !_pinLookup.TryGetValue(pin, out var info))
-        {
-            return;
-        }
-
-        if (!info.IsCluster)
-        {
-            return;
-        }
-
-        e.HideInfoWindow = true;
-        var span = PoiMap.VisibleRegion;
-        var currentRadius = span?.Radius.Kilometers ?? 2.0;
-        var nextRadius = Math.Max(0.3, currentRadius / 2);
-        PoiMap.MoveToRegion(MapSpan.FromCenterAndRadius(info.Center, Distance.FromKilometers(nextRadius)));
-    }
-
-    private sealed class ClusterInfo
-    {
-        public bool IsCluster { get; init; }
-        public int Count { get; init; }
-        public Location Center { get; init; } = new Location(0, 0);
-    }
-
     private async void OnSearchTapped(object? sender, TappedEventArgs e)
     {
-        await DisplayAlert("Search", "Tinh nang tim kiem se som co.", "OK");
+        await DisplayAlert("Tìm kiếm", "Tính năng tìm kiếm sẽ sớm có.", "OK");
     }
 
     private async void OnPremiumTapped(object? sender, TappedEventArgs e)
     {
-        await DisplayAlert("Premium", "Goi Premium se som co.", "OK");
+        await DisplayAlert("Premium", "Gói Premium sẽ sớm có.", "OK");
     }
 
     private async void OnLayersTapped(object? sender, TappedEventArgs e)
@@ -275,10 +259,17 @@ public partial class MapPage : ContentPage
         var last = await _localDb.GetLatestLocationLogAsync();
         if (last is null)
         {
-            await DisplayAlert("GPS", "Chua co vi tri gan nhat.", "OK");
+            await DisplayAlert("GPS", "Chưa có vị trí gần nhất.", "OK");
             return;
         }
-
         PoiMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Location(last.Latitude, last.Longitude), Distance.FromKilometers(2)));
+    }
+
+    private sealed class ClusterInfo
+    {
+        public bool IsCluster { get; init; }
+        public int Count { get; init; }
+        public string PoiId { get; init; } = string.Empty;
+        public Location Center { get; init; } = new Location(0, 0);
     }
 }

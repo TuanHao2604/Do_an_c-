@@ -4,23 +4,60 @@
              x:Class="SmartTourApp.Mobile.App">
     <Application.Resources>
         <ResourceDictionary>
-            <Color x:Key="Ink">#1F2937</Color>
-            <Color x:Key="InkMuted">#6B7280</Color>
-            <Color x:Key="Accent">#F3C244</Color>
-            <Color x:Key="AccentSoft">#FDF3D6</Color>
+            <!-- ═══ COLOR SYSTEM ═══ -->
+            <!-- Primary gradient pair -->
+            <Color x:Key="Primary">#0E6EB8</Color>
+            <Color x:Key="PrimaryDark">#0A5A96</Color>
+            <Color x:Key="PrimaryLight">#1A9DE8</Color>
+            <Color x:Key="PrimarySoft">#E0F0FF</Color>
+
+            <!-- Accent -->
+            <Color x:Key="Accent">#594AE2</Color>
+            <Color x:Key="AccentSoft">#EDE8FF</Color>
+
+            <!-- Semantic -->
             <Color x:Key="Success">#22C55E</Color>
+            <Color x:Key="Warning">#F59E0B</Color>
+            <Color x:Key="Danger">#EF4444</Color>
+            <Color x:Key="Info">#3B82F6</Color>
+
+            <!-- Neutrals -->
+            <Color x:Key="Ink">#0A3050</Color>
+            <Color x:Key="InkMuted">#6B7280</Color>
             <Color x:Key="Surface">#FFFFFF</Color>
-            <Color x:Key="SurfaceAlt">#F8F7F3</Color>
-            <Color x:Key="Border">#E5E7EB</Color>
-            <Color x:Key="PageBackground">#F6F5F1</Color>
+            <Color x:Key="SurfaceAlt">#F8FAFD</Color>
+            <Color x:Key="Border">#E2EAF3</Color>
+            <Color x:Key="PageBackground">#F0F7FF</Color>
             <Color x:Key="MapSurface">#E9F5EC</Color>
             <Color x:Key="MapLand">#BFE3C8</Color>
+
+            <!-- ═══ GRADIENTS ═══ -->
+            <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#0E6EB8" Offset="0.0" />
+                <GradientStop Color="#1A9DE8" Offset="1.0" />
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#594AE2" Offset="0.0" />
+                <GradientStop Color="#7D70F1" Offset="1.0" />
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="HeroGradient" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="Transparent" Offset="0.0" />
+                <GradientStop Color="#CC000000" Offset="1.0" />
+            </LinearGradientBrush>
 
             <LinearGradientBrush x:Key="ImageGradient" StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#C7D2FE" Offset="0.0" />
                 <GradientStop Color="#FDE68A" Offset="1.0" />
             </LinearGradientBrush>
 
+            <LinearGradientBrush x:Key="LoginGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#0A1128" Offset="0.0" />
+                <GradientStop Color="#594AE2" Offset="1.0" />
+            </LinearGradientBrush>
+
+            <!-- ═══ IMPLICIT STYLES ═══ -->
             <Style TargetType="Label">
                 <Setter Property="FontFamily" Value="UbuntuRegular" />
                 <Setter Property="TextColor" Value="{StaticResource Ink}" />
@@ -31,7 +68,19 @@
                 <Setter Property="CornerRadius" Value="22" />
                 <Setter Property="Padding" Value="18,12" />
                 <Setter Property="TextColor" Value="White" />
-                <Setter Property="BackgroundColor" Value="{StaticResource Ink}" />
+                <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+            </Style>
+
+            <Style TargetType="Entry">
+                <Setter Property="FontFamily" Value="UbuntuRegular" />
+                <Setter Property="TextColor" Value="{StaticResource Ink}" />
+                <Setter Property="PlaceholderColor" Value="{StaticResource InkMuted}" />
+            </Style>
+
+            <Style TargetType="Frame">
+                <Setter Property="HasShadow" Value="False" />
+                <Setter Property="BorderColor" Value="{StaticResource Border}" />
+                <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>

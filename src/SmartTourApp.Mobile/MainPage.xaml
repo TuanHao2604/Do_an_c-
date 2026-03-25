@@ -6,11 +6,11 @@
             BackgroundColor="{StaticResource PageBackground}"
             BarBackgroundColor="{StaticResource Surface}"
             BarTextColor="{StaticResource InkMuted}"
-            SelectedTabColor="{StaticResource Ink}"
+            SelectedTabColor="{StaticResource Primary}"
             UnselectedTabColor="{StaticResource InkMuted}">
 
-    <local:ExplorePage Title="Explore" IconImageSource="ic_explore.svg" />
-    <local:MapPage Title="Map" IconImageSource="ic_map.svg" />
-    <local:FavoritesPage Title="Favorites" IconImageSource="ic_heart.svg" />
-    <local:ProfilePage Title="Profile" IconImageSource="ic_profile.svg" />
+    <local:ExplorePage Title="Khám phá" IconImageSource="ic_explore.svg" />
+    <local:MapPage Title="Bản đồ" IconImageSource="ic_map.svg" />
+    <local:FavoritesPage Title="Yêu thích" IconImageSource="ic_heart.svg" />
+    <local:ProfilePage Title="Cá nhân" IconImageSource="ic_profile.svg" />
 </TabbedPage>

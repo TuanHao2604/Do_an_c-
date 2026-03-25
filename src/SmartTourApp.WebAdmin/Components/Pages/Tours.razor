@@ -1,0 +1,95 @@
+@page "/tours"
+@using MudBlazor
+@using SmartTourApp.Domain.Entities
+@using SmartTourApp.Domain.Interfaces
+@inject ITourService TourService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pt-6">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudText Typo="Typo.h4">Quản lý Tours</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="() => _showForm = true">
+            Thêm Tour
+        </MudButton>
+    </MudStack>
+
+    @if (_showForm)
+    {
+        <MudPaper Class="pa-4 mb-4" Elevation="1">
+            <MudText Typo="Typo.h6" Class="mb-3">@(_editing != null ? "Sửa Tour" : "Thêm Tour")</MudText>
+            <MudTextField @bind-Value="_form.Title" Label="Tiêu đề" Required="true" Variant="Variant.Outlined" />
+            <MudTextField @bind-Value="_form.Description" Label="Mô tả" Lines="3" Variant="Variant.Outlined" Class="mt-3" />
+            <MudNumericField @bind-Value="_form.DurationMinutes" Label="Thời lượng (phút)" Variant="Variant.Outlined" Class="mt-3" />
+            <MudTextField @bind-Value="_form.PoiIds" Label="POI IDs (phân cách bởi dấu phẩy)" Variant="Variant.Outlined" Class="mt-3" />
+            <MudStack Row="true" Class="mt-4">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveTour">Lưu</MudButton>
+                <MudButton OnClick="CancelForm">Hủy</MudButton>
+            </MudStack>
+        </MudPaper>
+    }
+
+    <MudTable Items="_tours" Hover="true" Elevation="1">
+        <HeaderContent>
+            <MudTh>Tiêu đề</MudTh>
+            <MudTh>Mô tả</MudTh>
+            <MudTh>Thời lượng</MudTh>
+            <MudTh>Số POI</MudTh>
+            <MudTh>Thao tác</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Title</MudTd>
+            <MudTd>@(context.Description?.Length > 50 ? context.Description[..50] + "..." : context.Description)</MudTd>
+            <MudTd>@context.DurationMinutes phút</MudTd>
+            <MudTd>@(context.PoiIds?.Split(',', StringSplitOptions.RemoveEmptyEntries).Length ?? 0)</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditTour(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteTour(context.Id)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+@code {
+    private List<Tour> _tours = new();
+    private Tour _form = new();
+    private Tour? _editing;
+    private bool _showForm;
+
+    protected override async Task OnInitializedAsync() => _tours = await TourService.GetAllAsync();
+
+    private void EditTour(Tour tour)
+    {
+        _editing = tour;
+        _form = new Tour { Title = tour.Title, Description = tour.Description, DurationMinutes = tour.DurationMinutes, PoiIds = tour.PoiIds };
+        _showForm = true;
+    }
+
+    private void CancelForm()
+    {
+        _showForm = false;
+        _editing = null;
+        _form = new Tour();
+    }
+
+    private async Task SaveTour()
+    {
+        if (string.IsNullOrWhiteSpace(_form.Title)) return;
+        if (_editing is not null)
+            await TourService.UpdateAsync(_editing.Id, _form);
+        else
+            await TourService.CreateAsync(_form);
+
+        _tours = await TourService.GetAllAsync();
+        CancelForm();
+        Snackbar.Add("Đã lưu tour!", Severity.Success);
+    }
+
+    private async Task DeleteTour(Guid id)
+    {
+        await TourService.DeleteAsync(id);
+        _tours = await TourService.GetAllAsync();
+        Snackbar.Add("Đã xóa tour!", Severity.Warning);
+    }
+}

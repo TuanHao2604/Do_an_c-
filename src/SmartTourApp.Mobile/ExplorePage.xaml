@@ -3,368 +3,375 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SmartTourApp.Mobile.ExplorePage"
              BackgroundColor="{StaticResource PageBackground}">
-    <ScrollView>
-        <VerticalStackLayout Padding="20,16,20,28" Spacing="20">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                <Frame CornerRadius="24" Padding="14,12"
-                       BackgroundColor="{StaticResource Surface}"
-                       BorderColor="{StaticResource Border}" HasShadow="True">
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ═══ APP BAR ═══ -->
+        <Grid Padding="20,14,20,10" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                </LinearGradientBrush>
+            </Grid.Background>
+
+            <!-- Menu icon placeholder -->
+            <Frame WidthRequest="36" HeightRequest="36" CornerRadius="12"
+                   BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
+                <Label Text="☰" FontSize="16" TextColor="White"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Frame>
+
+            <!-- Greeting -->
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+                <Label Text="Xin chào 👋" FontSize="11" TextColor="#BBFFFFFF" />
+                <Label x:Name="UserNameLabel" Text="Khách" FontSize="15" FontFamily="UbuntuBold" TextColor="White" />
+            </VerticalStackLayout>
+
+            <!-- Language selector -->
+            <Frame Grid.Column="2" WidthRequest="36" HeightRequest="36" CornerRadius="12"
+                   BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLanguageTapped" />
+                </Frame.GestureRecognizers>
+                <Label Text="🌐" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Frame>
+
+            <!-- Notification -->
+            <Frame Grid.Column="3" WidthRequest="36" HeightRequest="36" CornerRadius="12"
+                   BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
+                <Label Text="🔔" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Frame>
+        </Grid>
+
+        <!-- ═══ SCROLLABLE CONTENT ═══ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,12,16,100" Spacing="16">
+
+                <!-- ═══ SEARCH BAR ═══ -->
+                <Frame CornerRadius="16" Padding="14,12" HasShadow="True"
+                       BackgroundColor="{StaticResource Surface}" BorderColor="#260E6EB8">
                     <Frame.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnSearchTapped" />
                     </Frame.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
-                        <Image Source="ic_search.svg" HeightRequest="18" WidthRequest="18" />
-                        <Label Text="Find destinations worldwide"
-                               FontSize="14" TextColor="{StaticResource InkMuted}"
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Label Text="🔍" FontSize="16" VerticalOptions="Center" />
+                        <Label Text="Tìm địa điểm..." FontSize="14" TextColor="{StaticResource InkMuted}"
                                VerticalOptions="Center" />
+                        <Frame Grid.Column="2" WidthRequest="30" HeightRequest="30" CornerRadius="10"
+                               BackgroundColor="#140E6EB8" Padding="0" HasShadow="False" BorderColor="Transparent">
+                            <Label Text="⚙" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Frame>
                     </Grid>
                 </Frame>
-                <Frame WidthRequest="48" HeightRequest="48" CornerRadius="24"
-                       Padding="10" BackgroundColor="{StaticResource Accent}"
-                       HasShadow="True" HorizontalOptions="End">
-                    <Frame.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnPremiumTapped" />
-                    </Frame.GestureRecognizers>
-                    <Image Source="ic_crown.svg" HeightRequest="22" WidthRequest="22" />
-                </Frame>
-            </Grid>
 
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" VerticalOptions="Center">
-                <Frame CornerRadius="16" Padding="10,6"
-                       BackgroundColor="{StaticResource Surface}"
-                       BorderColor="{StaticResource Border}" HasShadow="False">
-                    <Label x:Name="SyncStatusLabel" Text="Chua dong bo"
+                <!-- ═══ CATEGORIES ═══ -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Danh mục" FontSize="15" FontFamily="UbuntuBold" TextColor="{StaticResource Ink}" />
+                    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                        <HorizontalStackLayout x:Name="CategoryChips" Spacing="8">
+                            <!-- Will be populated dynamically -->
+                        </HorizontalStackLayout>
+                    </ScrollView>
+                </VerticalStackLayout>
+
+                <!-- ═══ VOICE SELECTION ═══ -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Giọng thuyết minh" FontSize="15" FontFamily="UbuntuBold" />
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <Button x:Name="VoiceNorthBtn" Text="Miền Bắc"
+                                BackgroundColor="{StaticResource Primary}" TextColor="White"
+                                CornerRadius="20" FontSize="12" HeightRequest="38" Padding="0"
+                                Clicked="OnVoiceSelected" />
+                        <Button x:Name="VoiceCentralBtn" Text="Miền Trung"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource InkMuted}"
+                                CornerRadius="20" FontSize="12" HeightRequest="38" Padding="0"
+                                Clicked="OnVoiceSelected" />
+                        <Button x:Name="VoiceSouthBtn" Text="Miền Nam"
+                                BackgroundColor="{StaticResource SurfaceAlt}" TextColor="{StaticResource InkMuted}"
+                                CornerRadius="20" FontSize="12" HeightRequest="38" Padding="0"
+                                Clicked="OnVoiceSelected" />
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- ═══ AUTO-PLAY GEOFENCE ═══ -->
+                <Frame CornerRadius="16" Padding="12" HasShadow="False"
+                       BackgroundColor="{StaticResource Surface}" BorderColor="#1A0E6EB8">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                        <Frame WidthRequest="40" HeightRequest="40" CornerRadius="12"
+                               BackgroundColor="#140E6EB8" Padding="0" HasShadow="False" BorderColor="Transparent">
+                            <Label Text="🔊" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Frame>
+                        <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                            <Label Text="Tự động thuyết minh" FontSize="13" FontFamily="UbuntuBold"
+                                   TextColor="{StaticResource Ink}" />
+                            <Label Text="Tự phát khi đến gần địa điểm" FontSize="11"
+                                   TextColor="{StaticResource InkMuted}" />
+                        </VerticalStackLayout>
+                        <Switch x:Name="AutoPlaySwitch" Grid.Column="2"
+                                OnColor="{StaticResource Primary}"
+                                Toggled="OnAutoPlayToggled" />
+                    </Grid>
+                </Frame>
+
+                <!-- ═══ QUICK ACTIONS ═══ -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                    <Button Text="🔄 Đồng bộ" FontSize="11" Clicked="OnSyncClicked"
+                            BackgroundColor="{StaticResource Ink}" HeightRequest="38" CornerRadius="18" Padding="4,0" />
+                    <Button Text="📍 Gần tôi" FontSize="11" Clicked="OnNearbyClicked"
+                            BackgroundColor="{StaticResource Primary}" TextColor="White"
+                            HeightRequest="38" CornerRadius="18" Padding="4,0" />
+                    <Button Text="📷 Quét QR" FontSize="11" Clicked="OnQrClicked"
+                            BackgroundColor="{StaticResource Surface}" TextColor="{StaticResource Ink}"
+                            HeightRequest="38" CornerRadius="18" Padding="4,0" />
+                </Grid>
+
+                <!-- Sync status -->
+                <Frame CornerRadius="12" Padding="10,6" HasShadow="False"
+                       BackgroundColor="{StaticResource SurfaceAlt}" BorderColor="{StaticResource Border}">
+                    <Label x:Name="SyncStatusLabel" Text="Dữ liệu SQLite local"
                            FontSize="11" TextColor="{StaticResource InkMuted}" />
                 </Frame>
-                <Button Text="Dong bo" FontSize="12" Clicked="OnSyncClicked"
-                        BackgroundColor="{StaticResource Ink}" HeightRequest="36" CornerRadius="18" />
-                <Button Text="Gan toi" FontSize="12" Clicked="OnNearbyClicked"
-                        BackgroundColor="{StaticResource Accent}"
-                        TextColor="{StaticResource Ink}" HeightRequest="36" CornerRadius="18" />
-                <Button Text="Quet QR" FontSize="12" Clicked="OnQrClicked"
-                        BackgroundColor="{StaticResource Surface}"
-                        TextColor="{StaticResource Ink}" HeightRequest="36" CornerRadius="18" />
-            </Grid>
 
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalOptions="Center">
-                <Label Text="Luu tuyen di (an danh)" FontSize="12" TextColor="{StaticResource InkMuted}" />
-                <Switch x:Name="TrackingSwitch" Toggled="OnTrackingToggled" />
-            </Grid>
-            <Label x:Name="RouteSessionLabel" Text="Chua bat theo doi" FontSize="11" TextColor="{StaticResource InkMuted}" />
-
-            <Frame CornerRadius="20" Padding="0" BackgroundColor="{StaticResource MapSurface}"
-                   BorderColor="{StaticResource Border}" HasShadow="False">
-                <AbsoluteLayout HeightRequest="170">
-                    <BoxView Color="{StaticResource MapSurface}"
-                             AbsoluteLayout.LayoutBounds="0,0,1,1"
-                             AbsoluteLayout.LayoutFlags="All" />
-                    <BoxView Color="{StaticResource MapLand}" CornerRadius="24" Opacity="0.85"
-                             AbsoluteLayout.LayoutBounds="0.1,0.15,0.8,0.7"
-                             AbsoluteLayout.LayoutFlags="All" />
-
-                    <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
-                           BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                           AbsoluteLayout.LayoutBounds="0.2,0.35,-1,-1"
-                           AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="North America" FontSize="10" FontFamily="UbuntuMedium" />
-                    </Frame>
-                    <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
-                           BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                           AbsoluteLayout.LayoutBounds="0.22,0.7,-1,-1"
-                           AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="South America" FontSize="10" FontFamily="UbuntuMedium" />
-                    </Frame>
-                    <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
-                           BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                           AbsoluteLayout.LayoutBounds="0.55,0.35,-1,-1"
-                           AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="Europe" FontSize="10" FontFamily="UbuntuMedium" />
-                    </Frame>
-                    <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
-                           BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                           AbsoluteLayout.LayoutBounds="0.55,0.6,-1,-1"
-                           AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="Africa" FontSize="10" FontFamily="UbuntuMedium" />
-                    </Frame>
-                    <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
-                           BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                           AbsoluteLayout.LayoutBounds="0.78,0.38,-1,-1"
-                           AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="Asia" FontSize="10" FontFamily="UbuntuMedium" />
-                    </Frame>
-                    <Frame Padding="12,6" CornerRadius="16" HasShadow="True"
-                           BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                           AbsoluteLayout.LayoutBounds="0.82,0.72,-1,-1"
-                           AbsoluteLayout.LayoutFlags="PositionProportional">
-                        <Label Text="Oceania" FontSize="10" FontFamily="UbuntuMedium" />
-                    </Frame>
-                </AbsoluteLayout>
-            </Frame>
-
-            <Frame x:Name="NearestPoiCard" CornerRadius="16" Padding="14"
-                   BackgroundColor="{StaticResource Surface}"
-                   BorderColor="{StaticResource Border}" HasShadow="True"
-                   IsVisible="False">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="POI gan nhat" FontSize="12" TextColor="{StaticResource InkMuted}" />
-                        <Label x:Name="NearestPoiName" FontSize="16" FontFamily="UbuntuMedium" />
-                        <Label x:Name="NearestPoiDistance" FontSize="12" TextColor="{StaticResource InkMuted}" />
-                    </VerticalStackLayout>
-                    <Button Text="Nghe" FontSize="12" Clicked="OnNearestNarrateClicked"
-                            BackgroundColor="{StaticResource Ink}" />
-                </Grid>
-            </Frame>
-
-            <Label Text="Recently opened" FontSize="22" FontFamily="UbuntuBold" />
-
-            <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                <Frame WidthRequest="54" HeightRequest="54" CornerRadius="14"
-                       Padding="0" BackgroundColor="{StaticResource SurfaceAlt}"
-                       BorderColor="{StaticResource Border}" HasShadow="False">
-                    <Grid Background="{StaticResource ImageGradient}" />
-                </Frame>
-                <VerticalStackLayout Spacing="2">
-                    <Label Text="Ho Chi Minh" FontSize="16" FontFamily="UbuntuMedium" />
-                    <Label Text="City" FontSize="12" TextColor="{StaticResource InkMuted}" />
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
-
-            <Frame CornerRadius="18" Padding="0" HasShadow="True"
-                   BackgroundColor="{StaticResource Surface}">
-                <Grid HeightRequest="210">
-                    <Grid.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#8EC5FC" Offset="0.0" />
-                            <GradientStop Color="#E0C3FC" Offset="1.0" />
-                        </LinearGradientBrush>
-                    </Grid.Background>
-                    <Frame Padding="10,6" CornerRadius="12" HasShadow="False"
-                           BackgroundColor="{StaticResource Success}"
-                           HorizontalOptions="Start" VerticalOptions="Start"
-                           Margin="12">
-                        <Label Text="At the destination" FontSize="11" TextColor="White" />
-                    </Frame>
-                    <BoxView Color="Black" Opacity="0.35" HeightRequest="70"
-                             VerticalOptions="End" />
-                    <VerticalStackLayout Spacing="4" Padding="16,0,16,14"
-                                         VerticalOptions="End">
-                        <Label Text="Ho Chi Minh City" FontSize="24" FontFamily="UbuntuBold"
-                               TextColor="White" />
-                        <Label Text="Explore nearby places" FontSize="12" TextColor="White" />
-                    </VerticalStackLayout>
-                </Grid>
-            </Frame>
-
-            <Frame CornerRadius="14" Padding="12" HasShadow="False"
-                   BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}">
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
-                    <Frame WidthRequest="40" HeightRequest="40" CornerRadius="20"
-                           BackgroundColor="#E11D48" HasShadow="False">
-                        <BoxView Color="#2563EB" CornerRadius="20" />
-                    </Frame>
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="Cambodia" FontSize="14" FontFamily="UbuntuMedium" />
-                        <Label Text="Explore 1 destination" FontSize="12" TextColor="{StaticResource InkMuted}" />
-                    </VerticalStackLayout>
-                    <Label Text=">" FontSize="18" TextColor="{StaticResource InkMuted}"
-                           VerticalOptions="Center" />
-                </Grid>
-            </Frame>
-
-            <Label Text="Nearby destinations" FontSize="22" FontFamily="UbuntuBold" />
-
-            <VerticalStackLayout x:Name="PoiEmptyView" Spacing="6" IsVisible="False">
-                <Label Text="Khong co du lieu" FontSize="14" FontFamily="UbuntuMedium" />
-                <Label Text="Nhan Dong bo de tai danh sach diem den."
-                       FontSize="12" TextColor="{StaticResource InkMuted}" />
-            </VerticalStackLayout>
-
-            <VerticalStackLayout x:Name="PoiListLayout" Spacing="12">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate>
-                        <Frame CornerRadius="16" Padding="12"
-                               BackgroundColor="{StaticResource Surface}"
-                               BorderColor="{StaticResource Border}" HasShadow="True">
-                            <Frame.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnPoiTapped" CommandParameter="{Binding .}" />
-                            </Frame.GestureRecognizers>
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                                <Label Text="{Binding Name}" FontSize="16" FontFamily="UbuntuMedium" />
-                                <Frame Grid.Column="1" Padding="8,4" CornerRadius="10"
-                                       BackgroundColor="{StaticResource SurfaceAlt}"
-                                       BorderColor="{StaticResource Border}" HasShadow="False">
-                                    <Label Text="{Binding CategoryName}" FontSize="11"
-                                           TextColor="{StaticResource InkMuted}" />
-                                </Frame>
-                                <Label Grid.Row="1" Grid.ColumnSpan="2"
-                                       Text="{Binding Address}" FontSize="12"
-                                       TextColor="{StaticResource InkMuted}" Margin="0,6,0,0" />
-                            </Grid>
+                <!-- ═══ NEAREST POI ═══ -->
+                <Frame x:Name="NearestPoiCard" CornerRadius="16" Padding="14"
+                       BackgroundColor="{StaticResource Surface}" HasShadow="True"
+                       BorderColor="{StaticResource Border}" IsVisible="False">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Frame WidthRequest="48" HeightRequest="48" CornerRadius="14"
+                               Padding="0" HasShadow="False" BorderColor="Transparent">
+                            <Frame.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Frame.Background>
+                            <Label Text="📍" FontSize="20" TextColor="White"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
                         </Frame>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
+                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                            <Label Text="POI gần nhất" FontSize="11" TextColor="{StaticResource InkMuted}" />
+                            <Label x:Name="NearestPoiName" FontSize="15" FontFamily="UbuntuMedium" />
+                            <Label x:Name="NearestPoiDistance" FontSize="11" TextColor="{StaticResource InkMuted}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Text="Nghe" FontSize="11" Clicked="OnNearestNarrateClicked"
+                                BackgroundColor="{StaticResource Primary}" CornerRadius="14"
+                                Padding="14,8" HeightRequest="36" VerticalOptions="Center" />
+                    </Grid>
+                </Frame>
+
+                <!-- ═══ FEATURED POI ═══ -->
+                <VerticalStackLayout x:Name="FeaturedSection" Spacing="10" IsVisible="False">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Nổi bật" FontSize="17" FontFamily="UbuntuBold"
+                               TextColor="{StaticResource Ink}" />
+                        <Label Grid.Column="1" Text="Xem tất cả →" FontSize="12"
+                               TextColor="{StaticResource Primary}" />
+                    </Grid>
+
+                    <Frame x:Name="FeaturedPoiCard" CornerRadius="20" Padding="0" HasShadow="True"
+                           IsClippedToBounds="True" HeightRequest="180" BorderColor="#1A0E6EB8">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnFeaturedPoiTapped" />
+                        </Frame.GestureRecognizers>
+                        <Grid>
+                            <Grid.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Grid.Background>
+                            <!-- Gradient overlay at bottom -->
+                            <BoxView VerticalOptions="End" HeightRequest="100">
+                                <BoxView.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="Transparent" Offset="0.0" />
+                                        <GradientStop Color="#CC000000" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </BoxView.Background>
+                            </BoxView>
+                            <!-- Info -->
+                            <VerticalStackLayout VerticalOptions="End" Padding="16,16" Spacing="4">
+                                <Label x:Name="FeaturedPoiName" Text="" FontSize="18"
+                                       FontFamily="UbuntuBold" TextColor="White" />
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="📍" FontSize="12" />
+                                    <Label x:Name="FeaturedPoiCategory" Text="" FontSize="12"
+                                           TextColor="#CCFFFFFF" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                            <!-- Featured badge -->
+                            <Frame HorizontalOptions="End" VerticalOptions="Start"
+                                   Margin="0,12,12,0" Padding="8,4" CornerRadius="10"
+                                   BackgroundColor="#33FFFFFF" HasShadow="False" BorderColor="Transparent">
+                                <Label Text="⭐ Nổi bật" FontSize="11" TextColor="White" />
+                            </Frame>
+                        </Grid>
+                    </Frame>
+                </VerticalStackLayout>
+
+                <!-- ═══ TRACKING ═══ -->
+                <Frame CornerRadius="12" Padding="12" HasShadow="False"
+                       BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}">
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                            <Label Text="🛤️ Lưu tuyến đi (ẩn danh)" FontSize="12"
+                                   TextColor="{StaticResource InkMuted}" VerticalOptions="Center" />
+                            <Switch x:Name="TrackingSwitch" Toggled="OnTrackingToggled"
+                                    OnColor="{StaticResource Primary}" />
+                        </Grid>
+                        <Label x:Name="RouteSessionLabel" Text="Chưa bật theo dõi"
+                               FontSize="11" TextColor="{StaticResource InkMuted}" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- ═══ POI LIST ═══ -->
+                <Label Text="Danh sách điểm đến" FontSize="18" FontFamily="UbuntuBold" />
+
+                <VerticalStackLayout x:Name="PoiEmptyView" Spacing="8" IsVisible="False"
+                                     HorizontalOptions="Center">
+                    <Frame WidthRequest="80" HeightRequest="80" CornerRadius="40"
+                           BackgroundColor="{StaticResource PrimarySoft}" Padding="0"
+                           HasShadow="False" BorderColor="Transparent" HorizontalOptions="Center">
+                        <Label Text="📍" FontSize="32" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Frame>
+                    <Label Text="Không có dữ liệu" FontSize="15" FontFamily="UbuntuMedium"
+                           HorizontalOptions="Center" />
+                    <Label Text="Nhấn Đồng bộ để tải danh sách điểm đến."
+                           FontSize="12" TextColor="{StaticResource InkMuted}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout x:Name="PoiListLayout" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Frame CornerRadius="16" Padding="12"
+                                   BackgroundColor="{StaticResource Surface}"
+                                   BorderColor="{StaticResource Border}" HasShadow="True">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPoiTapped" CommandParameter="{Binding .}" />
+                                </Frame.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <!-- POI icon -->
+                                    <Frame WidthRequest="50" HeightRequest="50" CornerRadius="14"
+                                           Padding="0" HasShadow="False" BorderColor="Transparent">
+                                        <Frame.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#0E6EB8" Offset="0.0" />
+                                                <GradientStop Color="#1A9DE8" Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Frame.Background>
+                                        <Label Text="📍" FontSize="20" TextColor="White"
+                                               HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Frame>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                                        <Label Text="{Binding Name}" FontSize="14" FontFamily="UbuntuMedium"
+                                               TextColor="{StaticResource Ink}" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Address}" FontSize="11"
+                                               TextColor="{StaticResource InkMuted}" LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+                                    <Frame Grid.Column="2" Padding="8,4" CornerRadius="10"
+                                           BackgroundColor="{StaticResource PrimarySoft}"
+                                           BorderColor="Transparent" HasShadow="False"
+                                           VerticalOptions="Center">
+                                        <Label Text="{Binding CategoryName}" FontSize="10"
+                                               TextColor="{StaticResource Primary}" />
+                                    </Frame>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- ═══ STATISTICS ═══ -->
+                <Label Text="Thống kê nhanh" FontSize="18" FontFamily="UbuntuBold" />
+                <Frame CornerRadius="16" Padding="14" BackgroundColor="{StaticResource Surface}"
+                       BorderColor="{StaticResource Border}" HasShadow="False">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Top điểm đi nhiều nhất" FontSize="13" FontFamily="UbuntuMedium" />
+                        <VerticalStackLayout x:Name="TopVisitedList" Spacing="6">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="{Binding PoiName}" FontSize="12" />
+                                        <Label Grid.Column="1" Text="{Binding VisitCount, StringFormat='{0} lần'}"
+                                               FontSize="12" TextColor="{StaticResource InkMuted}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Label x:Name="AverageNarrationLabel" Text="Thời gian thuyết minh trung bình: --"
+                               FontSize="12" TextColor="{StaticResource InkMuted}" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- ═══ HEATMAP ═══ -->
+                <Label Text="Heatmap vị trí người dùng" FontSize="18" FontFamily="UbuntuBold" />
+                <Frame CornerRadius="16" Padding="14" BackgroundColor="{StaticResource Surface}"
+                       BorderColor="{StaticResource Border}" HasShadow="False">
+                    <VerticalStackLayout Spacing="8">
+                        <VerticalStackLayout x:Name="HeatmapList" Spacing="6">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="{Binding CellKey}" FontSize="12" />
+                                        <Label Grid.Column="1" Text="{Binding Count, StringFormat='{0} lượt'}"
+                                               FontSize="12" TextColor="{StaticResource InkMuted}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Label x:Name="HeatmapEmptyLabel" Text="Chưa có dữ liệu heatmap."
+                               FontSize="12" TextColor="{StaticResource InkMuted}" IsVisible="False" />
+                    </VerticalStackLayout>
+                </Frame>
+
             </VerticalStackLayout>
+        </ScrollView>
 
-            <Frame CornerRadius="18" Padding="0" HasShadow="True"
-                   BackgroundColor="{StaticResource Surface}">
-                <Grid HeightRequest="180">
-                    <Grid.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#F97316" Offset="0.0" />
-                            <GradientStop Color="#FACC15" Offset="1.0" />
-                        </LinearGradientBrush>
-                    </Grid.Background>
-                    <Image Source="ic_heart.svg" HeightRequest="20" WidthRequest="20"
-                           HorizontalOptions="End" VerticalOptions="Start" Margin="12" />
-                    <Frame Padding="10,6" CornerRadius="12" HasShadow="False"
-                           BackgroundColor="#111827" HorizontalOptions="End"
-                           VerticalOptions="End" Margin="12">
-                        <Label Text="425 km" FontSize="11" TextColor="White" />
-                    </Frame>
-                </Grid>
-            </Frame>
-            <Label Text="Angkor Wat" FontSize="16" FontFamily="UbuntuMedium" />
-            <Label Text="Cambodia" FontSize="12" TextColor="{StaticResource InkMuted}" />
-
-            <Label Text="Thong ke nhanh" FontSize="20" FontFamily="UbuntuBold" />
-            <Frame CornerRadius="16" Padding="14" BackgroundColor="{StaticResource Surface}"
-                   BorderColor="{StaticResource Border}" HasShadow="False">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Top dia diem di nhieu nhat" FontSize="13" FontFamily="UbuntuMedium" />
-                    <VerticalStackLayout x:Name="TopVisitedList" Spacing="6">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="{Binding PoiName}" FontSize="12" />
-                                    <Label Grid.Column="1" Text="{Binding VisitCount}" FontSize="12"
-                                           TextColor="{StaticResource InkMuted}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                    <Label x:Name="AverageNarrationLabel" Text="Thời gian thuyết minh trung bình: --"
-                           FontSize="12" TextColor="{StaticResource InkMuted}" />
+        <!-- ═══ AUDIO BANNER (floating) ═══ -->
+        <Frame x:Name="AudioBanner" Grid.Row="1" CornerRadius="16" Padding="12"
+               VerticalOptions="End" Margin="16,0,16,10" HasShadow="True"
+               IsVisible="False" BorderColor="Transparent">
+            <Frame.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                </LinearGradientBrush>
+            </Frame.Background>
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
+                <Frame WidthRequest="40" HeightRequest="40" CornerRadius="12"
+                       BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
+                    <Label Text="📍" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                    <Label Text="📍 Bạn đang ở gần" FontSize="10" TextColor="#BBFFFFFF" />
+                    <Label x:Name="AudioBannerPoiName" Text="" FontSize="13"
+                           FontFamily="UbuntuBold" TextColor="White" LineBreakMode="TailTruncation" />
                 </VerticalStackLayout>
-            </Frame>
-
-            <Label Text="Heatmap vi tri nguoi dung" FontSize="20" FontFamily="UbuntuBold" />
-            <Frame CornerRadius="16" Padding="14" BackgroundColor="{StaticResource Surface}"
-                   BorderColor="{StaticResource Border}" HasShadow="False">
-                <VerticalStackLayout Spacing="8">
-                    <VerticalStackLayout x:Name="HeatmapList" Spacing="6">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="{Binding CellKey}" FontSize="12" />
-                                    <Label Grid.Column="1" Text="{Binding Count}" FontSize="12"
-                                           TextColor="{StaticResource InkMuted}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                    <Label x:Name="HeatmapEmptyLabel" Text="Chua co du lieu heatmap."
-                           FontSize="12" TextColor="{StaticResource InkMuted}" IsVisible="False" />
-                </VerticalStackLayout>
-            </Frame>
-
-            <Label Text="Nearby countries" FontSize="22" FontFamily="UbuntuBold" />
-
-            <ScrollView Orientation="Horizontal">
-                <HorizontalStackLayout Spacing="14">
-                    <Frame WidthRequest="160" CornerRadius="16" Padding="0" HasShadow="True">
-                        <Grid HeightRequest="120">
-                            <Grid.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#60A5FA" Offset="0.0" />
-                                    <GradientStop Color="#A7F3D0" Offset="1.0" />
-                                </LinearGradientBrush>
-                            </Grid.Background>
-                            <Frame WidthRequest="32" HeightRequest="32" CornerRadius="16"
-                                   BackgroundColor="White" HasShadow="False"
-                                   HorizontalOptions="Start" VerticalOptions="End" Margin="10">
-                                <BoxView Color="#DC2626" CornerRadius="16" />
-                            </Frame>
-                            <Image Source="ic_heart.svg" HeightRequest="16" WidthRequest="16"
-                                   HorizontalOptions="End" VerticalOptions="Start" Margin="10" />
-                        </Grid>
-                        <Label Text="Singapore" FontSize="13" FontFamily="UbuntuMedium" Margin="10,8,10,12" />
-                    </Frame>
-
-                    <Frame WidthRequest="160" CornerRadius="16" Padding="0" HasShadow="True">
-                        <Grid HeightRequest="120">
-                            <Grid.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#FDE68A" Offset="0.0" />
-                                    <GradientStop Color="#FDBA74" Offset="1.0" />
-                                </LinearGradientBrush>
-                            </Grid.Background>
-                            <Frame WidthRequest="32" HeightRequest="32" CornerRadius="16"
-                                   BackgroundColor="White" HasShadow="False"
-                                   HorizontalOptions="Start" VerticalOptions="End" Margin="10">
-                                <BoxView Color="#16A34A" CornerRadius="16" />
-                            </Frame>
-                            <Image Source="ic_heart.svg" HeightRequest="16" WidthRequest="16"
-                                   HorizontalOptions="End" VerticalOptions="Start" Margin="10" />
-                        </Grid>
-                        <Label Text="Myanmar" FontSize="13" FontFamily="UbuntuMedium" Margin="10,8,10,12" />
-                    </Frame>
-
-                    <Frame WidthRequest="160" CornerRadius="16" Padding="0" HasShadow="True">
-                        <Grid HeightRequest="120">
-                            <Grid.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#A78BFA" Offset="0.0" />
-                                    <GradientStop Color="#60A5FA" Offset="1.0" />
-                                </LinearGradientBrush>
-                            </Grid.Background>
-                            <Frame WidthRequest="32" HeightRequest="32" CornerRadius="16"
-                                   BackgroundColor="White" HasShadow="False"
-                                   HorizontalOptions="Start" VerticalOptions="End" Margin="10">
-                                <BoxView Color="#2563EB" CornerRadius="16" />
-                            </Frame>
-                            <Image Source="ic_heart.svg" HeightRequest="16" WidthRequest="16"
-                                   HorizontalOptions="End" VerticalOptions="Start" Margin="10" />
-                        </Grid>
-                        <Label Text="Philippines" FontSize="13" FontFamily="UbuntuMedium" Margin="10,8,10,12" />
-                    </Frame>
-                </HorizontalStackLayout>
-            </ScrollView>
-
-            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                <Label Text="Experiences" FontSize="22" FontFamily="UbuntuBold" />
-                <Label Grid.Column="1" Text="See all" FontSize="12" TextColor="{StaticResource InkMuted}"
-                       VerticalOptions="Center" />
+                <Frame Grid.Column="2" WidthRequest="32" HeightRequest="32" CornerRadius="10"
+                       BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAudioPlayPause" />
+                    </Frame.GestureRecognizers>
+                    <Label x:Name="AudioPlayPauseIcon" Text="▶" FontSize="14" TextColor="White"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+                <Frame Grid.Column="3" WidthRequest="32" HeightRequest="32" CornerRadius="10"
+                       BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAudioReplay" />
+                    </Frame.GestureRecognizers>
+                    <Label Text="🔁" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+                <Frame Grid.Column="4" WidthRequest="32" HeightRequest="32" CornerRadius="10"
+                       BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAudioClose" />
+                    </Frame.GestureRecognizers>
+                    <Label Text="✕" FontSize="14" TextColor="White"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
             </Grid>
+        </Frame>
 
-            <ScrollView Orientation="Horizontal">
-                <HorizontalStackLayout Spacing="14">
-                    <Frame WidthRequest="180" CornerRadius="16" Padding="0" HasShadow="True">
-                        <Grid HeightRequest="130" Background="{StaticResource ImageGradient}" />
-                        <VerticalStackLayout Padding="10,8,10,12" Spacing="4">
-                            <Label Text="Saigon City" FontSize="13" FontFamily="UbuntuMedium" />
-                            <Label Text="Sightseeing Hop-On" FontSize="11" TextColor="{StaticResource InkMuted}" />
-                            <Label Text="From 575300 VND" FontSize="10" TextColor="{StaticResource InkMuted}" />
-                        </VerticalStackLayout>
-                    </Frame>
-
-                    <Frame WidthRequest="180" CornerRadius="16" Padding="0" HasShadow="True">
-                        <Grid HeightRequest="130">
-                            <Grid.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#FDE68A" Offset="0.0" />
-                                    <GradientStop Color="#93C5FD" Offset="1.0" />
-                                </LinearGradientBrush>
-                            </Grid.Background>
-                        </Grid>
-                        <VerticalStackLayout Padding="10,8,10,12" Spacing="4">
-                            <Label Text="Bitexco Tower" FontSize="13" FontFamily="UbuntuMedium" />
-                            <Label Text="Saigon Sky" FontSize="11" TextColor="{StaticResource InkMuted}" />
-                            <Label Text="From 273900 VND" FontSize="10" TextColor="{StaticResource InkMuted}" />
-                        </VerticalStackLayout>
-                    </Frame>
-                </HorizontalStackLayout>
-            </ScrollView>
-        </VerticalStackLayout>
-    </ScrollView>
+    </Grid>
 </ContentPage>

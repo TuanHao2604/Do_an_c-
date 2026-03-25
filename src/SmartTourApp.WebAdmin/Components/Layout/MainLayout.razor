@@ -7,7 +7,7 @@
 <MudSnackbarProvider />
 
 <MudLayout Class="app-shell">
-    <MudAppBar Elevation="0" Color="Color.Transparent">
+    <MudAppBar Elevation="1" Color="Color.Surface" Fixed="true" Style="border-bottom: 1px solid #e2e8f0;">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
                        Edge="Edge.Start" OnClick="ToggleDrawer" />
         <MudText Typo="Typo.h6" Class="ml-3 app-title">SmartTour Admin</MudText>
@@ -31,10 +31,26 @@
                         Icon="@Icons.Material.Filled.Category">
                 Danh mục
             </MudNavLink>
+            <MudNavLink Href="/languages" Match="NavLinkMatch.Prefix"
+                        Icon="@Icons.Material.Filled.Language">
+                Ngôn ngữ
+            </MudNavLink>
+            <MudNavLink Href="/tours" Match="NavLinkMatch.Prefix"
+                        Icon="@Icons.Material.Filled.Map">
+                Tours
+            </MudNavLink>
+            <MudNavLink Href="/service-packages" Match="NavLinkMatch.Prefix"
+                        Icon="@Icons.Material.Filled.CardMembership">
+                Gói dịch vụ
+            </MudNavLink>
+            <MudNavLink Href="/poi-requests" Match="NavLinkMatch.Prefix"
+                        Icon="@Icons.Material.Filled.RateReview">
+                Yêu cầu POI
+            </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
 
-    <MudMainContent Class="app-main">
+    <MudMainContent Class="app-main" Style="padding-top: 64px;">
         @Body
     </MudMainContent>
 </MudLayout>

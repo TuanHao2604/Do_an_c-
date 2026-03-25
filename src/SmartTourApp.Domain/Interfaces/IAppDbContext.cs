@@ -23,6 +23,9 @@ public interface IAppDbContext
     DbSet<HeatmapCell> HeatmapCells { get; }
     DbSet<UserFavorite> UserFavorites { get; }
     DbSet<PoiReview> PoiReviews { get; }
+    DbSet<Tour> Tours { get; }
+    DbSet<Payment> Payments { get; }
+    DbSet<PoiRequest> PoiRequests { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

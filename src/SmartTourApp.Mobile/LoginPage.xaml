@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SmartTourApp.Mobile.LoginPage"
+             NavigationPage.HasNavigationBar="False">
+    <Grid>
+        <!-- ═══ GRADIENT BACKGROUND ═══ -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#0A1128" Offset="0.0" />
+                <GradientStop Color="#1B3A5C" Offset="0.4" />
+                <GradientStop Color="#594AE2" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- Decorative circles -->
+        <Ellipse WidthRequest="300" HeightRequest="300" Fill="#08FFFFFF"
+                 HorizontalOptions="End" VerticalOptions="Start" Margin="80,-60,0,0" />
+        <Ellipse WidthRequest="200" HeightRequest="200" Fill="#06FFFFFF"
+                 HorizontalOptions="Start" VerticalOptions="End" Margin="-50,0,0,-40" />
+
+        <ScrollView VerticalOptions="Center">
+            <VerticalStackLayout Padding="28,40" Spacing="24">
+
+                <!-- ═══ LOGO / BRANDING ═══ -->
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <Frame WidthRequest="80" HeightRequest="80" CornerRadius="24"
+                           Padding="0" HasShadow="True" BorderColor="Transparent"
+                           HorizontalOptions="Center">
+                        <Frame.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#0E6EB8" Offset="0.0" />
+                                <GradientStop Color="#1A9DE8" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Frame.Background>
+                        <Label Text="🗺️" FontSize="36"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Frame>
+                    <Label Text="SmartTour" FontSize="28" FontFamily="UbuntuBold"
+                           TextColor="White" HorizontalOptions="Center" />
+                    <Label Text="Khám phá thông minh • Trải nghiệm trọn vẹn"
+                           FontSize="13" TextColor="#99FFFFFF" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <!-- ═══ GLASSMORPHISM LOGIN CARD ═══ -->
+                <Frame CornerRadius="24" Padding="24,28" HasShadow="True"
+                       BorderColor="#22FFFFFF" BackgroundColor="#22FFFFFF">
+                    <VerticalStackLayout Spacing="18">
+
+                        <Label Text="Đăng nhập" FontSize="22" FontFamily="UbuntuBold"
+                               TextColor="White" HorizontalOptions="Center" />
+
+                        <!-- Username -->
+                        <Frame CornerRadius="14" Padding="14,0" HeightRequest="50"
+                               BackgroundColor="#18FFFFFF" HasShadow="False"
+                               BorderColor="#33FFFFFF">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label Text="👤" FontSize="16" VerticalOptions="Center" />
+                                <Entry x:Name="UsernameEntry" Placeholder="Tên đăng nhập"
+                                       PlaceholderColor="#77FFFFFF" TextColor="White"
+                                       FontSize="14" FontFamily="UbuntuRegular"
+                                       VerticalOptions="Center" />
+                            </Grid>
+                        </Frame>
+
+                        <!-- Password -->
+                        <Frame CornerRadius="14" Padding="14,0" HeightRequest="50"
+                               BackgroundColor="#18FFFFFF" HasShadow="False"
+                               BorderColor="#33FFFFFF">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label Text="🔒" FontSize="16" VerticalOptions="Center" />
+                                <Entry x:Name="PasswordEntry" Placeholder="Mật khẩu"
+                                       PlaceholderColor="#77FFFFFF" TextColor="White"
+                                       IsPassword="True" FontSize="14" FontFamily="UbuntuRegular"
+                                       VerticalOptions="Center" />
+                            </Grid>
+                        </Frame>
+
+                        <!-- Login button -->
+                        <Button Text="Đăng nhập" FontSize="16" FontFamily="UbuntuBold"
+                                CornerRadius="14" HeightRequest="50"
+                                Clicked="OnLoginClicked">
+                            <Button.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <!-- Divider -->
+                        <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="12">
+                            <BoxView HeightRequest="1" Color="#33FFFFFF" VerticalOptions="Center" />
+                            <Label Text="hoặc" FontSize="12" TextColor="#77FFFFFF" />
+                            <BoxView Grid.Column="2" HeightRequest="1" Color="#33FFFFFF"
+                                     VerticalOptions="Center" />
+                        </Grid>
+
+                        <!-- Google login -->
+                        <Button Text="🔵  Đăng nhập với Google" FontSize="14"
+                                FontFamily="UbuntuMedium" CornerRadius="14"
+                                HeightRequest="48" BackgroundColor="#22FFFFFF"
+                                TextColor="White" BorderColor="#33FFFFFF" BorderWidth="1"
+                                Clicked="OnGoogleLoginClicked" />
+
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- ═══ GUEST MODE ═══ -->
+                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Button Text="Khám phá với tư cách khách"
+                            FontSize="14" FontFamily="UbuntuMedium"
+                            BackgroundColor="Transparent" TextColor="#CCFFFFFF"
+                            Clicked="OnGuestClicked" />
+                    <Label Text="v1.0.0 • SmartTour Da Nang" FontSize="11"
+                           TextColor="#55FFFFFF" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

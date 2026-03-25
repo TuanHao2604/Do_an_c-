@@ -9,6 +9,12 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        return new Window(new MainPage());
+        // Check if user is already logged in
+        var token = SecureStorage.GetAsync("auth_token").Result;
+        Page startPage = string.IsNullOrWhiteSpace(token)
+            ? new LoginPage()
+            : new MainPage();
+
+        return new Window(startPage);
     }
 }

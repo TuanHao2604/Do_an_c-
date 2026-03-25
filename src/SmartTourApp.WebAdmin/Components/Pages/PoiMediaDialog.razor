@@ -50,8 +50,11 @@
                                 <MudSelectItem Value="@("en")">Tiếng Anh</MudSelectItem>
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="12" sm="6">
+                        <MudItem xs="12" sm="4">
                             <MudTextField @bind-Value="_newAudioUrl" Label="URL âm thanh" Variant="Variant.Outlined" FullWidth="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="2" Class="d-flex align-end mb-2">
+                            <MudCheckBox @bind-Value="_isTts" Label="Là TTS" Color="Color.Info" />
                         </MudItem>
                         <MudItem xs="12" sm="2" Class="d-flex align-end">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddAudio" Disabled="string.IsNullOrWhiteSpace(_newAudioUrl)">Thêm</MudButton>
@@ -66,7 +69,10 @@
                                 </HeaderContent>
                                 <RowTemplate Context="audio">
                                     <MudTd>@audio.LanguageCode.ToUpper()</MudTd>
-                                    <MudTd>@audio.FileUrl</MudTd>
+                                    <MudTd>
+                                        <audio controls style="height: 32px; width: 220px;" src="@audio.FileUrl">
+                                        </audio>
+                                    </MudTd>
                                     <MudTd>
                                         @if (audio.IsTts) { <MudIcon Icon="@Icons.Material.Filled.Check" Color="Color.Info"/> }
                                     </MudTd>
@@ -99,6 +105,7 @@
     // Audio state
     private string _newAudioUrl = "";
     private string _audioLang = "vi";
+    private bool _isTts = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -132,8 +139,9 @@
     {
         if (string.IsNullOrWhiteSpace(_newAudioUrl)) return;
         var sortOrder = _poi?.AudioFiles.Count ?? 0;
-        await PoiService.AddAudioAsync(PoiId, _audioLang, _newAudioUrl, 0, sortOrder, false);
+        await PoiService.AddAudioAsync(PoiId, _audioLang, _newAudioUrl, 0, sortOrder, _isTts);
         _newAudioUrl = "";
+        _isTts = false;
         await LoadPoi();
         Snackbar.Add("Đã thêm âm thanh", Severity.Success);
     }

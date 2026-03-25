@@ -36,6 +36,13 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IAiGuideService, AiGuideService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ILanguageService, LanguageService>();
+builder.Services.AddScoped<IServicePackageService, ServicePackageService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<ITourService, TourService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IRevenueService, RevenueService>();
+builder.Services.AddScoped<IPoiRequestService, PoiRequestService>();
 builder.Services.AddHttpClient("OpenAI");
 
 var app = builder.Build();

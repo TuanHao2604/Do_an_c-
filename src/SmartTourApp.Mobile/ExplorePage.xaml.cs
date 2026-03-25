@@ -17,9 +17,19 @@ public partial class ExplorePage : ContentPage
     private readonly SyncApiService _syncService;
     private readonly Dictionary<string, DateTime> _lastTrigger = new();
     private LocalPoi? _nearestPoi;
+    private LocalPoi? _featuredPoi;
     private IDispatcherTimer? _trackingTimer;
     private string _routeSessionId = string.Empty;
     private bool _useBackgroundService;
+    private bool _isAutoPlayEnabled = true;
+    private bool _isAudioPlaying;
+    private string _selectedCategory = "Tất cả";
+    private List<LocalPoi> _allPois = new();
+
+    private static readonly string[] DefaultCategories =
+    {
+        "Tất cả", "Di tích", "Nhà hàng", "Cà phê", "Khách sạn", "Tham quan"
+    };
 
     public ExplorePage()
     {
@@ -29,6 +39,8 @@ public partial class ExplorePage : ContentPage
         _localDb = services.GetService<LocalDbService>() ?? new LocalDbService();
         _syncService = services.GetService<SyncApiService>()
             ?? new SyncApiService(new HttpClient { BaseAddress = new Uri("http://10.0.2.2:5001/") }, _localDb);
+
+        BuildCategoryChips();
     }
 
     protected override async void OnAppearing()
@@ -39,20 +51,155 @@ public partial class ExplorePage : ContentPage
         await UpdateHeatmapAsync();
     }
 
+    // ── Category Chips ──────────────────────────────────────────────────
+
+    private void BuildCategoryChips()
+    {
+        CategoryChips.Children.Clear();
+        foreach (var cat in DefaultCategories)
+        {
+            var isActive = cat == _selectedCategory;
+            var btn = new Button
+            {
+                Text = cat,
+                FontSize = 12,
+                FontFamily = "UbuntuMedium",
+                HeightRequest = 34,
+                CornerRadius = 17,
+                Padding = new Thickness(14, 0),
+                BackgroundColor = isActive
+                    ? Color.FromArgb("#0E6EB8")
+                    : Color.FromArgb("#140E6EB8"),
+                TextColor = isActive
+                    ? Colors.White
+                    : Color.FromArgb("#0E6EB8"),
+            };
+            btn.Clicked += OnCategoryClicked;
+            CategoryChips.Children.Add(btn);
+        }
+    }
+
+    private async void OnCategoryClicked(object? sender, EventArgs e)
+    {
+        if (sender is Button btn)
+        {
+            _selectedCategory = btn.Text;
+            BuildCategoryChips();
+            await ApplyFiltersAsync();
+        }
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        if (_selectedCategory == "Tất cả")
+        {
+            BindableLayout.SetItemsSource(PoiListLayout, _allPois);
+            PoiEmptyView.IsVisible = _allPois.Count == 0;
+            PoiListLayout.IsVisible = _allPois.Count > 0;
+        }
+        else
+        {
+            var filtered = _allPois
+                .Where(p => string.Equals(p.CategoryName, _selectedCategory, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            BindableLayout.SetItemsSource(PoiListLayout, filtered);
+            PoiEmptyView.IsVisible = filtered.Count == 0;
+            PoiListLayout.IsVisible = filtered.Count > 0;
+        }
+
+        UpdateFeaturedPoi();
+        await Task.CompletedTask;
+    }
+
+    // ── Featured POI ────────────────────────────────────────────────────
+
+    private void UpdateFeaturedPoi()
+    {
+        _featuredPoi = _allPois.FirstOrDefault(p => p.IsFeatured) ?? _allPois.FirstOrDefault();
+
+        if (_featuredPoi != null)
+        {
+            FeaturedSection.IsVisible = true;
+            FeaturedPoiName.Text = _featuredPoi.Name;
+            FeaturedPoiCategory.Text = _featuredPoi.CategoryName;
+        }
+        else
+        {
+            FeaturedSection.IsVisible = false;
+        }
+    }
+
+    private async void OnFeaturedPoiTapped(object? sender, TappedEventArgs e)
+    {
+        if (_featuredPoi is not null)
+        {
+            await Navigation.PushAsync(new PoiDetailPage(_featuredPoi, _localDb));
+        }
+    }
+
+    // ── Audio Banner ────────────────────────────────────────────────────
+
+    private void ShowAudioBanner(LocalPoi poi)
+    {
+        AudioBannerPoiName.Text = poi.Name;
+        AudioBanner.IsVisible = true;
+        _isAudioPlaying = true;
+        AudioPlayPauseIcon.Text = "⏸";
+    }
+
+    private void OnAudioPlayPause(object? sender, TappedEventArgs e)
+    {
+        _isAudioPlaying = !_isAudioPlaying;
+        AudioPlayPauseIcon.Text = _isAudioPlaying ? "⏸" : "▶";
+    }
+
+    private async void OnAudioReplay(object? sender, TappedEventArgs e)
+    {
+        if (_nearestPoi is not null)
+        {
+            await NarratePoiAsync(_nearestPoi, triggeredByQr: false);
+        }
+    }
+
+    private void OnAudioClose(object? sender, TappedEventArgs e)
+    {
+        AudioBanner.IsVisible = false;
+        _isAudioPlaying = false;
+    }
+
+    private void OnAutoPlayToggled(object? sender, ToggledEventArgs e)
+    {
+        _isAutoPlayEnabled = e.Value;
+    }
+
+    // ── Language ─────────────────────────────────────────────────────────
+
+    private async void OnLanguageTapped(object? sender, TappedEventArgs e)
+    {
+        var action = await DisplayActionSheet("Chọn ngôn ngữ", "Đóng", null,
+            "Tiếng Việt", "English", "한국어");
+        if (!string.IsNullOrEmpty(action) && action != "Đóng")
+        {
+            await DisplayAlert("Ngôn ngữ", $"Đã chọn: {action}", "OK");
+        }
+    }
+
+    // ── Data Loading ────────────────────────────────────────────────────
+
     private async Task LoadPoisAsync()
     {
         try
         {
-            var pois = await _localDb.GetAllPoisAsync();
-            BindableLayout.SetItemsSource(PoiListLayout, pois);
-            PoiEmptyView.IsVisible = pois.Count == 0;
-            PoiListLayout.IsVisible = pois.Count > 0;
-            SyncStatusLabel.Text = $"POI: {pois.Count} | Sync: {(await _localDb.GetLastSyncTimeAsync()):g}";
+            _allPois = await _localDb.GetAllPoisAsync();
+            await ApplyFiltersAsync();
+            SyncStatusLabel.Text = $"POI: {_allPois.Count} | Sync: {(await _localDb.GetLastSyncTimeAsync()):g}";
+
+            UpdateFeaturedPoi();
 
             var location = await GetCurrentLocationAsync();
             if (location is not null)
             {
-                await UpdateNearestPoiAsync(location, pois);
+                await UpdateNearestPoiAsync(location, _allPois);
             }
             else
             {
@@ -61,7 +208,7 @@ public partial class ExplorePage : ContentPage
         }
         catch (Exception ex)
         {
-            SyncStatusLabel.Text = $"Loi: {ex.Message}";
+            SyncStatusLabel.Text = $"Lỗi: {ex.Message}";
         }
     }
 
@@ -72,8 +219,8 @@ public partial class ExplorePage : ContentPage
 
         var avg = await _localDb.GetAverageNarrationSecondsAsync();
         AverageNarrationLabel.Text = avg > 0
-            ? $"Thoi gian thuyet minh trung binh: {avg:0.#}s"
-            : "Thoi gian thuyet minh trung binh: --";
+            ? $"Thời gian thuyết minh trung bình: {avg:0.#}s"
+            : "Thời gian thuyết minh trung bình: --";
     }
 
     private async Task UpdateHeatmapAsync()
@@ -128,7 +275,7 @@ public partial class ExplorePage : ContentPage
 
         _nearestPoi = nearest.Poi;
         NearestPoiName.Text = nearest.Poi.Name;
-        NearestPoiDistance.Text = $"Cach: {nearest.Distance:0.0} km";
+        NearestPoiDistance.Text = $"Cách: {nearest.Distance:0.0} km";
         NearestPoiCard.IsVisible = true;
     }
 
@@ -149,10 +296,7 @@ public partial class ExplorePage : ContentPage
     private async Task CheckGeofenceAndTriggerAsync(Location location, IReadOnlyList<LocalPoi>? pois = null)
     {
         var allPois = pois ?? await _localDb.GetAllPoisAsync();
-        if (allPois.Count == 0)
-        {
-            return;
-        }
+        if (allPois.Count == 0) return;
 
         var inRange = allPois
             .Select(p => new
@@ -164,20 +308,24 @@ public partial class ExplorePage : ContentPage
             .OrderBy(x => x.DistanceKm)
             .FirstOrDefault();
 
-        if (inRange is null)
-        {
-            return;
-        }
+        if (inRange is null) return;
 
         var lastTime = _lastTrigger.TryGetValue(inRange.Poi.Id, out var value) ? value : DateTime.MinValue;
-        if (DateTime.UtcNow - lastTime < TimeSpan.FromMinutes(10))
-        {
-            return;
-        }
+        if (DateTime.UtcNow - lastTime < TimeSpan.FromMinutes(10)) return;
 
         _lastTrigger[inRange.Poi.Id] = DateTime.UtcNow;
-        await DisplayAlert("Da den POI", $"Ban da vao khu vuc: {inRange.Poi.Name}", "OK");
-        await NarratePoiAsync(inRange.Poi, triggeredByQr: false);
+
+        if (_isAutoPlayEnabled)
+        {
+            ShowAudioBanner(inRange.Poi);
+            await NarratePoiAsync(inRange.Poi, triggeredByQr: false);
+        }
+        else
+        {
+            ShowAudioBanner(inRange.Poi);
+            _isAudioPlaying = false;
+            AudioPlayPauseIcon.Text = "▶";
+        }
     }
 
     private async Task NarratePoiAsync(LocalPoi poi, bool triggeredByQr)
@@ -207,10 +355,7 @@ public partial class ExplorePage : ContentPage
     private async Task CaptureAndProcessLocationAsync()
     {
         var location = await GetCurrentLocationAsync();
-        if (location is null)
-        {
-            return;
-        }
+        if (location is null) return;
 
         await LogLocationAsync(location);
         await CheckGeofenceAndTriggerAsync(location);
@@ -218,26 +363,27 @@ public partial class ExplorePage : ContentPage
         await UpdateHeatmapAsync();
     }
 
+    // ── Event Handlers ──────────────────────────────────────────────────
+
     private async void OnSyncClicked(object? sender, EventArgs e)
     {
-        SyncStatusLabel.Text = "Dang dong bo...";
-
+        SyncStatusLabel.Text = "Đang đồng bộ...";
         try
         {
             var count = await _syncService.SyncAsync();
             if (count >= 0)
             {
-                SyncStatusLabel.Text = $"Da dong bo {count} POI";
+                SyncStatusLabel.Text = $"Đã đồng bộ {count} POI";
                 await LoadPoisAsync();
             }
             else
             {
-                SyncStatusLabel.Text = "Khong the ket noi server (dung du lieu offline)";
+                SyncStatusLabel.Text = "Không thể kết nối server (dùng dữ liệu offline)";
             }
         }
         catch (Exception ex)
         {
-            SyncStatusLabel.Text = $"Loi sync: {ex.Message}";
+            SyncStatusLabel.Text = $"Lỗi sync: {ex.Message}";
         }
     }
 
@@ -248,7 +394,7 @@ public partial class ExplorePage : ContentPage
             var location = await GetCurrentLocationAsync();
             if (location is null)
             {
-                await DisplayAlert("GPS", "Khong lay duoc vi tri", "OK");
+                await DisplayAlert("GPS", "Không lấy được vị trí", "OK");
                 return;
             }
 
@@ -263,7 +409,7 @@ public partial class ExplorePage : ContentPage
             BindableLayout.SetItemsSource(PoiListLayout, nearby);
             PoiEmptyView.IsVisible = nearby.Count == 0;
             PoiListLayout.IsVisible = nearby.Count > 0;
-            SyncStatusLabel.Text = $"Gan ban: {nearby.Count} POI (ban kinh 5km)";
+            SyncStatusLabel.Text = $"Gần bạn: {nearby.Count} POI (bán kính 5km)";
 
             await LogLocationAsync(location);
             await CheckGeofenceAndTriggerAsync(location, pois);
@@ -272,7 +418,7 @@ public partial class ExplorePage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Loi", ex.Message, "OK");
+            await DisplayAlert("Lỗi", ex.Message, "OK");
         }
     }
 
@@ -280,60 +426,81 @@ public partial class ExplorePage : ContentPage
     {
         if (e.Parameter is LocalPoi poi)
         {
-            var action = await DisplayActionSheet(
-                poi.Name,
-                "Dong",
-                null,
-                "Nghe thuyet minh",
-                "Danh dau da den");
-
-            if (action == "Nghe thuyet minh")
-            {
-                await NarratePoiAsync(poi, triggeredByQr: false);
-            }
-            else if (action == "Danh dau da den")
-            {
-                await _localDb.LogVisitAsync(new LocalVisitLog
-                {
-                    PoiId = poi.Id,
-                    PoiName = poi.Name,
-                    VisitedAt = DateTime.UtcNow,
-                    NarrationSeconds = null,
-                    TriggeredByQr = false
-                });
-                await RefreshStatsAsync();
-            }
+            await Navigation.PushAsync(new PoiDetailPage(poi, _localDb));
         }
     }
 
     private async void OnSearchTapped(object? sender, TappedEventArgs e)
     {
-        await DisplayAlert("Search", "Tinh nang tim kiem se som co.", "OK");
-    }
-
-    private async void OnPremiumTapped(object? sender, TappedEventArgs e)
-    {
-        await DisplayAlert("Premium", "Goi Premium se som co.", "OK");
+        var query = await DisplayPromptAsync("Tìm kiếm", "Nhập tên điểm đến", "Tìm", "Hủy");
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var results = _allPois
+                .Where(p => p.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            BindableLayout.SetItemsSource(PoiListLayout, results);
+            PoiEmptyView.IsVisible = results.Count == 0;
+            PoiListLayout.IsVisible = results.Count > 0;
+            SyncStatusLabel.Text = $"Kết quả: {results.Count} POI";
+        }
     }
 
     private async void OnQrClicked(object? sender, EventArgs e)
     {
-        var qrValue = await DisplayPromptAsync("Quet QR", "Nhap ma QR", "OK", "Huy");
-        if (string.IsNullOrWhiteSpace(qrValue))
-        {
-            return;
-        }
+        var qrValue = await DisplayPromptAsync("Quét QR", "Nhập mã QR", "OK", "Hủy");
+        if (string.IsNullOrWhiteSpace(qrValue)) return;
 
         var poi = await _localDb.GetPoiByQrValueAsync(qrValue.Trim());
         if (poi is null)
         {
-            await DisplayAlert("QR", "Khong tim thay POI tu QR.", "OK");
+            await DisplayAlert("QR", "Không tìm thấy POI từ QR.", "OK");
             return;
         }
 
-        await DisplayAlert("QR", $"Kich hoat noi dung: {poi.Name}", "OK");
+        await DisplayAlert("QR", $"Kích hoạt nội dung: {poi.Name}", "OK");
         await NarratePoiAsync(poi, triggeredByQr: true);
     }
+
+    private void OnVoiceSelected(object? sender, EventArgs e)
+    {
+        var buttons = new[] { VoiceNorthBtn, VoiceCentralBtn, VoiceSouthBtn };
+        foreach (var btn in buttons)
+        {
+            btn.BackgroundColor = Color.FromArgb("#F8FAFD");
+            btn.TextColor = Color.FromArgb("#6B7280");
+        }
+        if (sender is Button selected)
+        {
+            selected.BackgroundColor = Color.FromArgb("#0E6EB8");
+            selected.TextColor = Colors.White;
+        }
+    }
+
+    private async void OnCreateTourClicked(object? sender, EventArgs e)
+    {
+        await DisplayAlert("Tour", "Tính năng tạo Tour sẽ sớm có.", "OK");
+    }
+
+    private void OnTourTapped(object? sender, TappedEventArgs e)
+    {
+        // Navigate to tour detail
+    }
+
+    private async void OnPremiumTapped(object? sender, TappedEventArgs e)
+    {
+        await DisplayAlert("Premium", "Gói Premium sẽ sớm có.", "OK");
+    }
+
+    private async void OnNearestNarrateClicked(object? sender, EventArgs e)
+    {
+        if (_nearestPoi is not null)
+        {
+            ShowAudioBanner(_nearestPoi);
+            await NarratePoiAsync(_nearestPoi, triggeredByQr: false);
+        }
+    }
+
+    // ── Tracking ────────────────────────────────────────────────────────
 
     private async Task RefreshFromLogsAsync()
     {
@@ -398,7 +565,7 @@ public partial class ExplorePage : ContentPage
             }
             if (status != PermissionStatus.Granted)
             {
-                await DisplayAlert("GPS", "Can quyen vi tri nen de theo doi nen.", "OK");
+                await DisplayAlert("GPS", "Cần quyền vị trí nền để theo dõi.", "OK");
                 TrackingSwitch.IsToggled = false;
                 return;
             }
@@ -406,7 +573,7 @@ public partial class ExplorePage : ContentPage
             _routeSessionId = Guid.NewGuid().ToString("N");
             Preferences.Set("route_session_id", _routeSessionId);
             Preferences.Set("tracking_enabled", true);
-            RouteSessionLabel.Text = $"Dang theo doi (an danh): {_routeSessionId[..6]}";
+            RouteSessionLabel.Text = $"Đang theo dõi (ẩn danh): {_routeSessionId[..6]}";
 
             _useBackgroundService = TryStartBackgroundService();
             StopTrackingTimer();
@@ -428,15 +595,7 @@ public partial class ExplorePage : ContentPage
             _useBackgroundService = false;
             StopBackgroundService();
             StopTrackingTimer();
-            RouteSessionLabel.Text = "Da tat theo doi";
-        }
-    }
-
-    private async void OnNearestNarrateClicked(object? sender, EventArgs e)
-    {
-        if (_nearestPoi is not null)
-        {
-            await NarratePoiAsync(_nearestPoi, triggeredByQr: false);
+            RouteSessionLabel.Text = "Đã tắt theo dõi";
         }
     }
 
@@ -446,5 +605,4 @@ public partial class ExplorePage : ContentPage
         var lngKey = Math.Round(lng, 2).ToString("0.00", CultureInfo.InvariantCulture);
         return $"{latKey},{lngKey}";
     }
-
 }

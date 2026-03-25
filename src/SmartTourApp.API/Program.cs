@@ -51,6 +51,18 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IAiGuideService, AiGuideService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ILanguageService, LanguageService>();
+builder.Services.AddScoped<IServicePackageService, ServicePackageService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<ITourService, TourService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IRevenueService, RevenueService>();
+builder.Services.AddScoped<IPoiRequestService, PoiRequestService>();
+builder.Services.AddScoped<IUploadService>(sp =>
+{
+    var env = sp.GetRequiredService<IWebHostEnvironment>();
+    return new UploadService(new WebHostEnvAccessor(env.WebRootPath));
+});
 builder.Services.AddHttpClient("OpenAI");
 
 // ── Swagger ──

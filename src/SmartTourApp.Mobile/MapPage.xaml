@@ -5,74 +5,120 @@
              x:Class="SmartTourApp.Mobile.MapPage"
              BackgroundColor="{StaticResource PageBackground}">
     <Grid RowDefinitions="Auto,*">
-        <Grid Padding="20,16,20,10" ColumnDefinitions="*,Auto" ColumnSpacing="12">
-            <Frame CornerRadius="24" Padding="14,12"
-                   BackgroundColor="{StaticResource Surface}"
-                   BorderColor="{StaticResource Border}" HasShadow="True">
+
+        <!-- ═══ APP BAR ═══ -->
+        <Grid Padding="16,14,16,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Frame WidthRequest="36" HeightRequest="36" CornerRadius="12"
+                   BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
                 <Frame.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnSearchTapped" />
                 </Frame.GestureRecognizers>
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
-                    <Image Source="ic_search.svg" HeightRequest="18" WidthRequest="18" />
-                    <Label Text="Find destinations worldwide"
-                           FontSize="14" TextColor="{StaticResource InkMuted}"
-                           VerticalOptions="Center" />
-                </Grid>
+                <Label Text="🔍" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
             </Frame>
-            <Frame WidthRequest="48" HeightRequest="48" CornerRadius="24"
-                   Padding="10" BackgroundColor="{StaticResource Accent}"
-                   HasShadow="True" HorizontalOptions="End">
+            <Label Text="🗺️ Bản đồ" FontSize="16" FontFamily="UbuntuBold" TextColor="White"
+                   HorizontalOptions="Center" VerticalOptions="Center" />
+            <Frame Grid.Column="2" WidthRequest="36" HeightRequest="36" CornerRadius="12"
+                   BackgroundColor="#33FFFFFF" Padding="0" HasShadow="False" BorderColor="Transparent">
                 <Frame.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnPremiumTapped" />
+                    <TapGestureRecognizer Tapped="OnTargetTapped" />
                 </Frame.GestureRecognizers>
-                <Image Source="ic_crown.svg" HeightRequest="22" WidthRequest="22" />
+                <Label Text="📍" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
             </Frame>
         </Grid>
 
-        <Grid Grid.Row="1" Padding="20,10,20,20" RowDefinitions="*,Auto" RowSpacing="12">
-            <Grid Grid.Row="0">
-                <maps:Map x:Name="PoiMap" MapType="Street" IsShowingUser="True" />
+        <!-- ═══ MAP + OVERLAY ═══ -->
+        <Grid Grid.Row="1">
+            <maps:Map x:Name="PoiMap" MapType="Street" IsShowingUser="True" />
 
-                <VerticalStackLayout Spacing="12" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,16,16">
-                    <Frame WidthRequest="48" HeightRequest="48" CornerRadius="24"
-                           BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                           HasShadow="True">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnLayersTapped" />
-                        </Frame.GestureRecognizers>
-                        <Image Source="ic_layers.svg" HeightRequest="20" WidthRequest="20" />
-                    </Frame>
-                    <Frame WidthRequest="48" HeightRequest="48" CornerRadius="24"
-                           BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                           HasShadow="True">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnTargetTapped" />
-                        </Frame.GestureRecognizers>
-                        <Image Source="ic_target.svg" HeightRequest="20" WidthRequest="20" />
-                    </Frame>
-                </VerticalStackLayout>
-            </Grid>
+            <!-- FABs -->
+            <VerticalStackLayout Spacing="10" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,16,90">
+                <Frame WidthRequest="44" HeightRequest="44" CornerRadius="14"
+                       BackgroundColor="{StaticResource Surface}" HasShadow="True" Padding="0"
+                       BorderColor="{StaticResource Border}">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnLayersTapped" />
+                    </Frame.GestureRecognizers>
+                    <Label Text="🗂" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+                <Frame WidthRequest="44" HeightRequest="44" CornerRadius="14"
+                       BackgroundColor="{StaticResource Surface}" HasShadow="True" Padding="0"
+                       BorderColor="{StaticResource Border}">
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnTargetTapped" />
+                    </Frame.GestureRecognizers>
+                    <Label Text="🎯" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+            </VerticalStackLayout>
 
-            <Frame Grid.Row="1" CornerRadius="16" Padding="12"
-                   BackgroundColor="{StaticResource Surface}" BorderColor="{StaticResource Border}"
-                   HasShadow="False">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Heatmap (top 12)" FontSize="12" FontFamily="UbuntuMedium" />
-                    <VerticalStackLayout x:Name="MapHeatmapList" Spacing="6">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="{Binding CellKey}" FontSize="12" />
-                                    <Label Grid.Column="1" Text="{Binding Count}" FontSize="12"
-                                           TextColor="{StaticResource InkMuted}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                    <Label x:Name="MapHeatmapEmpty" Text="Chua co du lieu heatmap."
-                           FontSize="12" TextColor="{StaticResource InkMuted}" IsVisible="False" />
-                    <Label x:Name="MapLastLocationLabel" Text="Vi tri gan nhat: --"
-                           FontSize="11" TextColor="{StaticResource InkMuted}" />
+            <!-- ═══ POI PREVIEW CARD ═══ -->
+            <Frame x:Name="PoiPreviewCard" VerticalOptions="End" Margin="16,0,16,16"
+                   CornerRadius="20" Padding="14,10,14,14" HasShadow="True"
+                   BackgroundColor="{StaticResource Surface}" BorderColor="#260E6EB8"
+                   IsVisible="False">
+                <VerticalStackLayout Spacing="12">
+                    <!-- Handle -->
+                    <BoxView WidthRequest="40" HeightRequest="4" CornerRadius="2"
+                             Color="#DCE8F5" HorizontalOptions="Center" />
+                    <!-- POI Info -->
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Frame WidthRequest="46" HeightRequest="46" CornerRadius="14"
+                               Padding="0" HasShadow="True" BorderColor="Transparent">
+                            <Frame.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Frame.Background>
+                            <Label Text="📍" FontSize="18" TextColor="White"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Frame>
+                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                            <Label x:Name="PreviewPoiName" Text="" FontSize="15"
+                                   FontFamily="UbuntuMedium" TextColor="{StaticResource Ink}"
+                                   LineBreakMode="TailTruncation" />
+                            <HorizontalStackLayout Spacing="8">
+                                <Frame Padding="6,2" CornerRadius="8" HasShadow="False"
+                                       BackgroundColor="{StaticResource PrimarySoft}" BorderColor="Transparent">
+                                    <Label x:Name="PreviewPoiCategory" Text="" FontSize="10"
+                                           TextColor="{StaticResource Primary}" />
+                                </Frame>
+                                <Label x:Name="PreviewPoiCoords" Text="" FontSize="10"
+                                       TextColor="{StaticResource InkMuted}" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                        <Frame Grid.Column="2" WidthRequest="28" HeightRequest="28" CornerRadius="10"
+                               BackgroundColor="#0A000000" Padding="0" HasShadow="False" BorderColor="Transparent">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnPreviewClose" />
+                            </Frame.GestureRecognizers>
+                            <Label Text="✕" FontSize="12" TextColor="{StaticResource InkMuted}"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Frame>
+                    </Grid>
+                    <!-- Buttons -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button Text="ℹ Chi tiết" FontSize="13" FontFamily="UbuntuBold"
+                                CornerRadius="14" HeightRequest="42"
+                                Clicked="OnPreviewDetailClicked">
+                            <Button.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#0E6EB8" Offset="0.0" />
+                                    <GradientStop Color="#1A9DE8" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Column="1" Text="🎧 Nghe" FontSize="13" FontFamily="UbuntuBold"
+                                CornerRadius="14" HeightRequest="42"
+                                BackgroundColor="#0A0E6EB8" TextColor="{StaticResource Primary}"
+                                BorderColor="{StaticResource Primary}" BorderWidth="1.5"
+                                Clicked="OnPreviewListenClicked" />
+                    </Grid>
                 </VerticalStackLayout>
             </Frame>
         </Grid>

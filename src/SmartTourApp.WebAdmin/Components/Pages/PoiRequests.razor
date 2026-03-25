@@ -1,0 +1,129 @@
+@page "/poi-requests"
+@using MudBlazor
+@using SmartTourApp.Domain.Entities
+@using SmartTourApp.Domain.Interfaces
+@inject IPoiRequestService RequestService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pt-6">
+    <MudText Typo="Typo.h4" Class="mb-4">Yêu cầu POI</MudText>
+
+    <!-- Stat chips -->
+    <MudStack Row="true" Spacing="3" Class="mb-4">
+        <MudChip Color="Color.Warning" Variant="Variant.Filled">Chờ duyệt: @_counts.Pending</MudChip>
+        <MudChip Color="Color.Success" Variant="Variant.Filled">Đã duyệt: @_counts.Approved</MudChip>
+        <MudChip Color="Color.Error" Variant="Variant.Filled">Từ chối: @_counts.Rejected</MudChip>
+    </MudStack>
+
+    <!-- Filter -->
+    <MudStack Row="true" Class="mb-4" AlignItems="AlignItems.Center">
+        <MudSelect T="string" @bind-Value="_statusFilter" Label="Lọc trạng thái" Variant="Variant.Outlined" Style="width:200px" Clearable="true">
+            <MudSelectItem Value="@("Pending")">Chờ duyệt</MudSelectItem>
+            <MudSelectItem Value="@("Approved")">Đã duyệt</MudSelectItem>
+            <MudSelectItem Value="@("Rejected")">Từ chối</MudSelectItem>
+        </MudSelect>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadRequests">Tìm</MudButton>
+    </MudStack>
+
+    <MudTable Items="_requests" Hover="true" Elevation="1">
+        <HeaderContent>
+            <MudTh>Người gửi</MudTh>
+            <MudTh>Loại</MudTh>
+            <MudTh>Trạng thái</MudTh>
+            <MudTh>Ngày tạo</MudTh>
+            <MudTh>Ghi chú Admin</MudTh>
+            <MudTh>Thao tác</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.User?.FullName</MudTd>
+            <MudTd>
+                <MudChip Size="Size.Small" Color="@(context.RequestType == "Create" ? Color.Primary : Color.Secondary)">
+                    @context.RequestType
+                </MudChip>
+            </MudTd>
+            <MudTd>
+                <MudChip Size="Size.Small" Color="@StatusColor(context.Status)">@context.Status</MudChip>
+            </MudTd>
+            <MudTd>@context.CreatedAt.ToString("dd/MM/yyyy HH:mm")</MudTd>
+            <MudTd>@(context.AdminNote ?? "—")</MudTd>
+            <MudTd>
+                @if (context.Status == "Pending")
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" OnClick="() => Approve(context.Id)" Title="Duyệt" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error" OnClick="() => ShowReject(context.Id)" Title="Từ chối" />
+                }
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="() => Delete(context.Id)" Title="Xóa" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+<!-- Reject dialog -->
+<MudDialog @bind-Visible="_showReject">
+    <TitleContent>Lý do từ chối</TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="_rejectNote" Label="Lý do" Lines="3" Variant="Variant.Outlined" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="() => _showReject = false">Hủy</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="RejectConfirm">Từ chối</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<PoiRequest> _requests = new();
+    private RequestCounts _counts = new();
+    private string? _statusFilter;
+    private bool _showReject;
+    private string _rejectNote = "";
+    private Guid _rejectId;
+
+    // Hardcoded admin userId for demo purposes
+    private readonly Guid _adminId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+
+    protected override async Task OnInitializedAsync() => await LoadRequests();
+
+    private async Task LoadRequests()
+    {
+        _counts = await RequestService.GetRequestCountsAsync();
+        var result = await RequestService.GetAllPagedAsync(_statusFilter, 1, 50);
+        _requests = result.Items;
+    }
+
+    private async Task Approve(Guid id)
+    {
+        await RequestService.ApproveAsync(id, _adminId, "Đã duyệt bởi Admin");
+        await LoadRequests();
+        Snackbar.Add("Đã duyệt yêu cầu!", Severity.Success);
+    }
+
+    private void ShowReject(Guid id)
+    {
+        _rejectId = id;
+        _rejectNote = "";
+        _showReject = true;
+    }
+
+    private async Task RejectConfirm()
+    {
+        if (string.IsNullOrWhiteSpace(_rejectNote)) return;
+        await RequestService.RejectAsync(_rejectId, _adminId, _rejectNote);
+        _showReject = false;
+        await LoadRequests();
+        Snackbar.Add("Đã từ chối yêu cầu!", Severity.Warning);
+    }
+
+    private async Task Delete(Guid id)
+    {
+        await RequestService.DeleteAsync(id, _adminId, true);
+        await LoadRequests();
+    }
+
+    private static Color StatusColor(string status) => status switch
+    {
+        "Pending" => Color.Warning,
+        "Approved" => Color.Success,
+        "Rejected" => Color.Error,
+        _ => Color.Default
+    };
+}

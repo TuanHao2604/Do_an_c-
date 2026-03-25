@@ -1,6 +1,7 @@
 @using MudBlazor
 @using SmartTourApp.Domain.Interfaces
 @inject IPoiService PoiService
+@inject IJSRuntime JS
 
 <MudDialog>
     <DialogContent>
@@ -13,6 +14,8 @@
             </MudItem>
             <MudItem xs="12">
                 <MudTextField @bind-Value="_description" Label="Mô tả (VI)" Lines="3" Variant="Variant.Outlined" />
+                <MudButton EndIcon="@Icons.Material.Filled.VolumeUp" Size="Size.Small" OnClick='() => PlayTts(_description, "vi")'
+                           Class="mt-1" Variant="Variant.Text" Color="Color.Primary">Nghe thử TTS</MudButton>
             </MudItem>
             <MudItem xs="12" sm="6">
                 <MudTextField @bind-Value="_address" Label="Địa chỉ" Variant="Variant.Outlined" />
@@ -109,4 +112,12 @@
     }
 
     private void Cancel() => MudDialog.Cancel();
+
+    private async Task PlayTts(string text, string lang)
+    {
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            await JS.InvokeVoidAsync("speakText", text, lang);
+        }
+    }
 }

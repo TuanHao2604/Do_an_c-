@@ -1,0 +1,83 @@
+@page "/languages"
+@using MudBlazor
+@using SmartTourApp.Domain.Entities
+@using SmartTourApp.Domain.Interfaces
+@inject ILanguageService LanguageService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pt-6">
+    <MudText Typo="Typo.h4" Class="mb-4">Quản lý Ngôn ngữ</MudText>
+
+    <MudPaper Class="pa-4 mb-4" Elevation="1">
+        <MudGrid>
+            <MudItem xs="4">
+                <MudTextField @bind-Value="_newCode" Label="Mã ngôn ngữ" Variant="Variant.Outlined" Placeholder="vi, en, ko..." />
+            </MudItem>
+            <MudItem xs="4">
+                <MudTextField @bind-Value="_newName" Label="Tên hiển thị" Variant="Variant.Outlined" Placeholder="Tiếng Việt" />
+            </MudItem>
+            <MudItem xs="4" Class="d-flex align-end">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddLanguage" StartIcon="@Icons.Material.Filled.Add">
+                    Thêm ngôn ngữ
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <MudTable Items="_languages" Hover="true" Elevation="1">
+        <HeaderContent>
+            <MudTh>Mã</MudTh>
+            <MudTh>Tên</MudTh>
+            <MudTh>Mặc định</MudTh>
+            <MudTh>Thao tác</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Code</MudTd>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>
+                @if (context.IsDefault)
+                {
+                    <MudChip Color="Color.Success" Size="Size.Small">Mặc định</MudChip>
+                }
+            </MudTd>
+            <MudTd>
+                @if (!context.IsDefault)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Star" Color="Color.Warning" OnClick="() => SetDefault(context.Code)" Title="Đặt mặc định" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context.Code)" Title="Xóa" />
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+@code {
+    private List<Language> _languages = new();
+    private string _newCode = "";
+    private string _newName = "";
+
+    protected override async Task OnInitializedAsync() => _languages = await LanguageService.GetLanguagesAsync();
+
+    private async Task AddLanguage()
+    {
+        if (string.IsNullOrWhiteSpace(_newCode) || string.IsNullOrWhiteSpace(_newName)) return;
+        await LanguageService.CreateOrUpdateAsync(new Language { Code = _newCode.Trim(), Name = _newName.Trim() });
+        _languages = await LanguageService.GetLanguagesAsync();
+        _newCode = _newName = "";
+        Snackbar.Add("Đã thêm ngôn ngữ!", Severity.Success);
+    }
+
+    private async Task SetDefault(string code)
+    {
+        await LanguageService.SetDefaultAsync(code);
+        _languages = await LanguageService.GetLanguagesAsync();
+        Snackbar.Add("Đã cập nhật ngôn ngữ mặc định!", Severity.Success);
+    }
+
+    private async Task Delete(string code)
+    {
+        await LanguageService.ToggleActiveAsync(code, false);
+        _languages = await LanguageService.GetLanguagesAsync();
+        Snackbar.Add("Đã xóa ngôn ngữ!", Severity.Warning);
+    }
+}

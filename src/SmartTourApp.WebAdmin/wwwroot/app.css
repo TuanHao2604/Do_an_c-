@@ -41,7 +41,7 @@ body {
 }
 
 .app-main {
-  padding: 28px 32px 40px;
+  padding: 80px 32px 40px;
 }
 
 .mud-appbar {
@@ -150,6 +150,6 @@ body {
 
 @media (max-width: 900px) {
   .app-main {
-    padding: 20px 18px 32px;
+    padding: 72px 18px 32px;
   }
 }

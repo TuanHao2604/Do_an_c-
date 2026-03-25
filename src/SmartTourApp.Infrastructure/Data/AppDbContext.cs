@@ -27,6 +27,9 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<HeatmapCell> HeatmapCells => Set<HeatmapCell>();
     public DbSet<UserFavorite> UserFavorites => Set<UserFavorite>();
     public DbSet<PoiReview> PoiReviews => Set<PoiReview>();
+    public DbSet<Tour> Tours => Set<Tour>();
+    public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<PoiRequest> PoiRequests => Set<PoiRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -217,6 +220,38 @@ public class AppDbContext : DbContext, IAppDbContext
             e.HasOne(pr => pr.User).WithMany(u => u.Reviews).HasForeignKey(pr => pr.UserId);
             e.HasOne(pr => pr.Poi).WithMany(p => p.Reviews).HasForeignKey(pr => pr.PoiId);
             e.HasIndex(pr => pr.CreatedAt);
+        });
+
+        // ── Tour ──
+        modelBuilder.Entity<Tour>(e =>
+        {
+            e.ToTable("tours");
+            e.HasKey(t => t.Id);
+            e.Property(t => t.Title).IsRequired().HasMaxLength(300);
+        });
+
+        // ── Payment ──
+        modelBuilder.Entity<Payment>(e =>
+        {
+            e.ToTable("payments");
+            e.HasKey(p => p.Id);
+            e.Property(p => p.Amount).HasColumnType("decimal(18,2)");
+            e.Property(p => p.Status).IsRequired().HasMaxLength(20);
+            e.Property(p => p.TransactionId).HasMaxLength(200);
+            e.HasOne(p => p.User).WithMany().HasForeignKey(p => p.UserId);
+            e.HasOne(p => p.Package).WithMany().HasForeignKey(p => p.PackageId);
+            e.HasIndex(p => p.CreatedAt);
+        });
+
+        // ── PoiRequest ──
+        modelBuilder.Entity<PoiRequest>(e =>
+        {
+            e.ToTable("poi_requests");
+            e.HasKey(r => r.Id);
+            e.Property(r => r.RequestType).IsRequired().HasMaxLength(20);
+            e.Property(r => r.Status).IsRequired().HasMaxLength(20);
+            e.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId);
+            e.HasIndex(r => r.Status);
         });
 
         // ── Seed Data ──
